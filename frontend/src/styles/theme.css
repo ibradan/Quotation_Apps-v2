@@ -1,0 +1,253 @@
+/* Theme Components Styles */
+
+/* Theme Toggle Button */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-standard);
+  min-width: 120px;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.theme-icon {
+  font-size: var(--font-size-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+}
+
+.theme-label {
+  white-space: nowrap;
+}
+
+/* Compact theme toggle for smaller spaces */
+.theme-toggle.compact {
+  padding: var(--space-xs) var(--space-sm);
+  min-width: auto;
+}
+
+.theme-toggle.compact .theme-label {
+  display: none;
+}
+
+/* Theme Selector Dropdown */
+.theme-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.theme-select {
+  appearance: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-xl) var(--space-sm) var(--space-md);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-standard);
+  min-width: 140px;
+  
+  /* Custom dropdown arrow */
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-sm) center;
+}
+
+[data-theme="dark"] .theme-select {
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%23ccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.theme-select:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+}
+
+.theme-select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(var(--primary-500), 0.1);
+}
+
+/* Theme system indicator in sidebar */
+.sidebar .theme-toggle {
+  background: transparent;
+  border: none;
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  justify-content: center;
+  min-width: auto;
+}
+
+.sidebar.collapsed .theme-toggle .theme-label {
+  display: none;
+}
+
+.sidebar .theme-toggle:hover {
+  background: var(--bg-overlay);
+}
+
+/* Theme toggle in settings page */
+.settings-theme-section {
+  padding: var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+}
+
+.settings-theme-section h3 {
+  margin: 0 0 var(--space-md) 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.settings-theme-section p {
+  margin: 0 0 var(--space-lg) 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.theme-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-primary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+.theme-option:hover {
+  border-color: var(--border-medium);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-option.selected {
+  border-color: var(--primary-500);
+  background: rgba(var(--primary-500), 0.05);
+}
+
+.theme-option-icon {
+  font-size: var(--font-size-xl);
+  min-width: 24px;
+  text-align: center;
+}
+
+.theme-option-content h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.theme-option-content p {
+  margin: var(--space-xs) 0 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Theme preview cards */
+.theme-preview {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.theme-preview-card {
+  flex: 1;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.theme-preview-light {
+  background: #ffffff;
+  border-color: #e0e0e0;
+  color: #333333;
+}
+
+.theme-preview-dark {
+  background: #1a1a1a;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+.theme-preview-system {
+  background: linear-gradient(45deg, #ffffff 50%, #1a1a1a 50%);
+  border-color: #808080;
+  color: #666666;
+}
+
+/* Animation for theme transitions */
+* {
+  transition: background-color var(--transition-standard),
+              border-color var(--transition-standard),
+              color var(--transition-standard),
+              box-shadow var(--transition-standard);
+}
+
+/* Disable transitions during theme change to prevent flashing */
+.theme-changing * {
+  transition: none !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .theme-toggle {
+    min-width: auto;
+    padding: var(--space-xs) var(--space-sm);
+  }
+  
+  .theme-toggle .theme-label {
+    display: none;
+  }
+  
+  .theme-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .theme-option {
+    padding: var(--space-sm);
+  }
+}

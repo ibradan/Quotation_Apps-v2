@@ -1,0 +1,387 @@
+/* ENHANCED TYPOGRAPHY SYSTEM */
+@import './styles/design-tokens.css';
+
+/* Base Typography Classes */
+.text-xs { 
+  font-size: var(--font-size-xs); 
+  line-height: var(--line-height-tight); 
+  font-family: var(--font-family-primary);
+}
+
+.text-sm { 
+  font-size: var(--font-size-sm); 
+  line-height: var(--line-height-normal); 
+  font-family: var(--font-family-primary);
+}
+
+.text-md, .text-base { 
+  font-size: var(--font-size-md); 
+  line-height: var(--line-height-normal); 
+  font-family: var(--font-family-primary);
+}
+
+.text-lg { 
+  font-size: var(--font-size-lg); 
+  line-height: var(--line-height-normal); 
+  font-family: var(--font-family-primary);
+}
+
+.text-xl { 
+  font-size: var(--font-size-xl); 
+  line-height: var(--line-height-tight); 
+  font-family: var(--font-family-primary);
+}
+
+.text-2xl { 
+  font-size: var(--font-size-2xl); 
+  line-height: var(--line-height-tight); 
+  font-family: var(--font-family-primary);
+}
+
+.text-3xl { 
+  font-size: var(--font-size-3xl); 
+  line-height: var(--line-height-tight); 
+  font-family: var(--font-family-primary);
+}
+
+.text-4xl { 
+  font-size: var(--font-size-4xl); 
+  line-height: var(--line-height-tight); 
+  font-family: var(--font-family-primary);
+}
+
+/* Font Weight Utilities */
+.font-light { font-weight: var(--font-weight-light); }
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+.font-extrabold { font-weight: var(--font-weight-extrabold); }
+
+/* Enhanced Heading Styles */
+h1, .h1 { 
+  font-size: var(--font-size-3xl); 
+  font-weight: var(--font-weight-bold); 
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-lg) 0;
+  font-family: var(--font-family-primary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+h2, .h2 { 
+  font-size: var(--font-size-2xl); 
+  font-weight: var(--font-weight-semibold); 
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-md) 0;
+  font-family: var(--font-family-primary);
+}
+
+h3, .h3 { 
+  font-size: var(--font-size-xl); 
+  font-weight: var(--font-weight-semibold); 
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-sm) 0;
+  font-family: var(--font-family-primary);
+}
+
+h4, .h4 { 
+  font-size: var(--font-size-lg); 
+  font-weight: var(--font-weight-medium); 
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-sm) 0;
+  font-family: var(--font-family-primary);
+}
+
+h5, .h5 { 
+  font-size: var(--font-size-md); 
+  font-weight: var(--font-weight-medium); 
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-xs) 0;
+  font-family: var(--font-family-primary);
+}
+
+h6, .h6 { 
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-medium); 
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-xs) 0;
+  font-family: var(--font-family-primary);
+}
+
+/* Enhanced Body Text */
+p, .text-body { 
+  font-size: var(--font-size-md); 
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-lg) 0;
+  font-family: var(--font-family-primary);
+}
+
+.text-body-sm { 
+  font-size: var(--font-size-sm); 
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary);
+  font-family: var(--font-family-primary);
+}
+
+.text-body-xs { 
+  font-size: var(--font-size-xs); 
+  line-height: var(--line-height-normal);
+  color: var(--text-muted);
+  font-family: var(--font-family-primary);
+}
+
+/* Enhanced Labels and Form Elements */
+label, .label { 
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+  font-family: var(--font-family-primary);
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.form-hint, .hint { 
+  font-size: var(--font-size-xs); 
+  color: var(--text-muted);
+  line-height: var(--line-height-normal);
+  font-style: italic;
+  font-family: var(--font-family-primary);
+  margin-top: var(--space-xs);
+}
+
+/* Enhanced Button Typography */
+.btn-text { 
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  font-family: var(--font-family-primary);
+}
+
+.btn-text-sm { 
+  font-size: var(--font-size-xs); 
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  font-family: var(--font-family-primary);
+}
+
+.btn-text-lg { 
+  font-size: var(--font-size-md); 
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  font-family: var(--font-family-primary);
+}
+
+/* Enhanced Table Typography */
+table th { 
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  font-family: var(--font-family-primary);
+  color: var(--text-secondary);
+}
+
+table td { 
+  font-size: var(--font-size-sm); 
+  line-height: var(--line-height-normal);
+  font-family: var(--font-family-primary);
+  color: var(--text-primary);
+}
+
+/* Enhanced Badges and Tags */
+.badge, .tag { 
+  font-size: var(--font-size-xs); 
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  font-family: var(--font-family-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Enhanced Navigation */
+.nav-text { 
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  font-family: var(--font-family-primary);
+}
+
+.nav-text-sm { 
+  font-size: var(--font-size-xs); 
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  font-family: var(--font-family-primary);
+}
+
+/* Enhanced Status and Indicators */
+.status-text { 
+  font-size: var(--font-size-xs); 
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  font-family: var(--font-family-primary);
+}
+
+/* Enhanced Numbers and Prices */
+.number, .price { 
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+}
+
+.number-lg, .price-lg { 
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-lg); 
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+}
+
+/* Code and Monospace */
+code, .code {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  background: var(--bg-tertiary);
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+}
+
+pre {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  background: var(--bg-tertiary);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  line-height: var(--line-height-relaxed);
+}
+
+/* Responsive Typography - Mobile First */
+@media screen and (max-width: 640px) {
+  .h1, h1 { 
+    font-size: var(--font-size-2xl); 
+    line-height: var(--line-height-tight);
+  }
+  
+  .h2, h2 { 
+    font-size: var(--font-size-xl); 
+    line-height: var(--line-height-tight);
+  }
+  
+  .h3, h3 { 
+    font-size: var(--font-size-lg); 
+    line-height: var(--line-height-normal);
+  }
+  
+  .h4, h4, .h5, h5, .h6, h6 { 
+    font-size: var(--font-size-base); 
+    line-height: var(--line-height-normal);
+  }
+  
+  .text-lg { 
+    font-size: var(--font-size-base); 
+  }
+  
+  .text-sm { 
+    font-size: var(--font-size-xs); 
+  }
+}
+
+/* Tablet Responsive */
+@media screen and (min-width: 641px) and (max-width: 1024px) {
+  .h1, h1 { 
+    font-size: var(--font-size-3xl); 
+    line-height: var(--line-height-tight);
+  }
+  
+  .h2, h2 { 
+    font-size: var(--font-size-2xl); 
+    line-height: var(--line-height-tight);
+  }
+}
+
+/* Enhanced Focus and Accessibility */
+.focus-visible,
+*:focus-visible {
+  outline: 2px solid var(--primary-main);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Screen Reader Only Text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .text-primary { color: var(--text-primary); }
+  .text-secondary { color: var(--text-primary); }
+  .badge, .tag { 
+    border: 2px solid var(--text-primary);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .h1, h1, .h2, h2, .h3, h3, .h4, h4, .h5, h5, .h6, h6 {
+    color: #000;
+    page-break-after: avoid;
+  }
+  
+  .text-base, p, .text-sm {
+    color: #000;
+    line-height: 1.4;
+  }
+  
+  .badge, .tag {
+    border: 1px solid #000;
+    background: transparent;
+    color: #000;
+  }
+}
+
+@media (max-width: 480px) {
+  h1, .h1 { font-size: var(--font-xl); }
+  h2, .h2 { font-size: var(--font-lg); }
+  h3, .h3 { font-size: var(--font-base); }
+  
+  .text-4xl { font-size: var(--font-2xl); }
+  .text-3xl { font-size: var(--font-xl); }
+  .text-2xl { font-size: var(--font-lg); }
+  .text-xl { font-size: var(--font-base); }
+} 
