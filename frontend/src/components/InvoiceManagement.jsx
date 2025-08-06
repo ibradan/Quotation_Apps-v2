@@ -199,10 +199,10 @@ function InvoiceManagement({ quotations }) {
       
       // Generate invoice HTML content
       const invoiceHTML = `
-        <div style="background: #4ecdc4; padding: 20px; min-height: 100vh; font-family: Arial, sans-serif; color: #333;">
+        <div style="background: #4ecdc4; padding: 15px; font-family: Arial, sans-serif; color: #333;">
           <div style="background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; max-width: 800px; margin: 0 auto;">
             <!-- Header -->
-            <div style="padding: 25px; border-bottom: 2px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="padding: 20px; border-bottom: 2px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start;">
               <div style="display: flex; align-items: center; gap: 15px;">
                 <div style="display: flex; gap: 3px;">
                   <div style="width: 8px; height: 25px; border-radius: 2px; background: #00d4aa;"></div>
@@ -230,47 +230,47 @@ function InvoiceManagement({ quotations }) {
             </div>
             
             <!-- Content -->
-            <div style="padding: 25px;">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 25px;">
+            <div style="padding: 20px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 20px;">
                 <div>
-                  <h3 style="color: #4ecdc4; margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">Tagihan Kepada</h3>
-                  <div style="font-size: 18px; font-weight: 700; color: #333; margin: 8px 0;">${invoice.customer}</div>
-                  <p style="margin: 5px 0; color: #333; font-size: 14px;">Pelanggan</p>
-                  <p style="margin: 5px 0; color: #333; font-size: 14px;">Telepon: +62 21 1234 5678</p>
-                  <p style="margin: 5px 0; color: #333; font-size: 14px;">Email: customer@example.com</p>
+                  <h3 style="color: #4ecdc4; margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Tagihan Kepada</h3>
+                  <div style="font-size: 18px; font-weight: 700; color: #333; margin: 6px 0;">${invoice.customer}</div>
+                  <p style="margin: 4px 0; color: #333; font-size: 14px;">Pelanggan</p>
+                  <p style="margin: 4px 0; color: #333; font-size: 14px;">Telepon: +62 21 1234 5678</p>
+                  <p style="margin: 4px 0; color: #333; font-size: 14px;">Email: customer@example.com</p>
                 </div>
                 <div>
-                  <h3 style="color: #4ecdc4; margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">Proyek</h3>
-                  <p style="margin: 5px 0; color: #333; font-size: 14px;">Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.</p>
-                  <div style="height: 1px; background: #f0f0f0; margin: 15px 0;"></div>
-                  <p style="margin: 5px 0; color: #333; font-size: 14px;"><strong>ID Klien:</strong> CL-${Math.floor(Math.random() * 1000000)}</p>
-                  <p style="margin: 5px 0; color: #333; font-size: 14px;"><strong>No. Akun:</strong> ACC-${Math.floor(Math.random() * 1000000)}</p>
+                  <h3 style="color: #4ecdc4; margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Proyek</h3>
+                  <p style="margin: 4px 0; color: #333; font-size: 14px;">Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.</p>
+                  <div style="height: 1px; background: #f0f0f0; margin: 12px 0;"></div>
+                  <p style="margin: 4px 0; color: #333; font-size: 14px;"><strong>ID Klien:</strong> CL-${Math.floor(Math.random() * 1000000)}</p>
+                  <p style="margin: 4px 0; color: #333; font-size: 14px;"><strong>No. Akun:</strong> ACC-${Math.floor(Math.random() * 1000000)}</p>
                 </div>
               </div>
               
               <!-- Items Table -->
-              <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
                 <thead>
                   <tr style="background: #f8f9fa;">
-                    <th style="padding: 12px; text-align: left; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">NO</th>
-                    <th style="padding: 12px; text-align: left; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">DESKRIPSI ITEM</th>
-                    <th style="padding: 12px; text-align: center; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">QTY</th>
-                    <th style="padding: 12px; text-align: right; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">HARGA</th>
-                    <th style="padding: 12px; text-align: right; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">JUMLAH</th>
+                    <th style="padding: 10px; text-align: left; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">NO</th>
+                    <th style="padding: 10px; text-align: left; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">DESKRIPSI ITEM</th>
+                    <th style="padding: 10px; text-align: center; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">QTY</th>
+                    <th style="padding: 10px; text-align: right; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">HARGA</th>
+                    <th style="padding: 10px; text-align: right; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">JUMLAH</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td style="padding: 12px; borderBottom: '1px solid #f0f0f0'; color: '#333';">1</td>
-                    <td style="padding: 12px; borderBottom: '1px solid #f0f0f0'; color: '#333';">
+                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333';">1</td>
+                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333';">
                       <div style="fontWeight: '600'; color: '#333';">Layanan Profesional</div>
-                      <div style="color: '#666'; fontSize: '12px'; marginTop: '3px';">Solusi bisnis komprehensif dan layanan konsultasi yang disediakan sesuai dengan persyaratan proyek.</div>
+                      <div style="color: '#666'; fontSize: '12px'; marginTop: '2px';">Solusi bisnis komprehensif dan layanan konsultasi yang disediakan sesuai dengan persyaratan proyek.</div>
                     </td>
-                    <td style="padding: 12px; borderBottom: '1px solid #f0f0f0'; color: '#333'; textAlign: 'center';">1</td>
-                    <td style="padding: 12px; borderBottom: '1px solid #f0f0f0'; color: '#333'; textAlign: 'right';">
+                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333'; textAlign: 'center';">1</td>
+                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333'; textAlign: 'right';">
                       ${formatCurrency(invoice.total || invoice.totalAmount || 0)}
                     </td>
-                    <td style="padding: 12px; borderBottom: '1px solid #f0f0f0'; color: '#333'; textAlign: 'right'; fontWeight: '700';">
+                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333'; textAlign: 'right'; fontWeight: '700';">
                       ${formatCurrency(invoice.total || invoice.totalAmount || 0)}
                     </td>
                   </tr>
@@ -278,36 +278,36 @@ function InvoiceManagement({ quotations }) {
               </table>
               
               <!-- Summary -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
                 <div>
-                  <h3 style="color: #4ecdc4; margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">Metode Pembayaran</h3>
-                  <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                    <div style="width: 25px; height: 15px; border-radius: 4px; background: #00d4aa;"></div>
-                    <div style="width: 25px; height: 15px; border-radius: 4px; background: #ff6b35;"></div>
-                    <div style="width: 25px; height: 15px; border-radius: 4px; background: #4ecdc4;"></div>
-                    <div style="width: 25px; height: 15px; border-radius: 4px; background: #ff4757;"></div>
+                  <h3 style="color: #4ecdc4; margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Metode Pembayaran</h3>
+                  <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                    <div style="width: 20px; height: 12px; border-radius: 4px; background: #00d4aa;"></div>
+                    <div style="width: 20px; height: 12px; border-radius: 4px; background: #ff6b35;"></div>
+                    <div style="width: 20px; height: 12px; border-radius: 4px; background: #4ecdc4;"></div>
+                    <div style="width: 20px; height: 12px; border-radius: 4px; background: #ff4757;"></div>
                   </div>
-                  <p style="margin: 5px 0; color: #333; font-size: 14px;"><strong>Transfer Bank:</strong> 1234-5678-9012-3456</p>
-                  <p style="margin: 5px 0; color: #333; font-size: 14px;"><strong>PayPal:</strong> payment@quotationapps.com</p>
+                  <p style="margin: 4px 0; color: #333; font-size: 14px;"><strong>Transfer Bank:</strong> 1234-5678-9012-3456</p>
+                  <p style="margin: 4px 0; color: #333; font-size: 14px;"><strong>PayPal:</strong> payment@quotationapps.com</p>
                 </div>
                 <div style="text-align: right;">
-                  <div style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 14px;">
+                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px;">
                     <span>Sub-Total:</span>
                     <span>${formatCurrency(invoice.total || invoice.totalAmount || 0)}</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 14px;">
+                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px;">
                     <span>Pajak (11%):</span>
                     <span>${formatCurrency((invoice.total || invoice.totalAmount || 0) * 0.11)}</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 14px;">
+                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px;">
                     <span>Diskon (10%):</span>
                     <span>-${formatCurrency((invoice.total || invoice.totalAmount || 0) * 0.10)}</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 14px;">
+                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px;">
                     <span>DP (Down Payment):</span>
                     <span>-${formatCurrency(invoice.down_payment || 0)}</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 18px; font-weight: 800; color: #ff4757; border-top: 2px solid #f0f0f0; padding-top: 8px; margin-top: 8px;">
+                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 16px; font-weight: 800; color: #ff4757; border-top: 2px solid #f0f0f0; padding-top: 6px; margin-top: 6px;">
                     <span>TOTAL:</span>
                     <span>${formatCurrency((invoice.total || invoice.totalAmount || 0) - (invoice.down_payment || 0))}</span>
                   </div>
@@ -316,20 +316,20 @@ function InvoiceManagement({ quotations }) {
             </div>
             
             <!-- Footer -->
-            <div style="padding: 20px; background: #f8f9fa; display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+            <div style="padding: 15px; background: #f8f9fa; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
               <div style="color: #333;">
-                <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700;">Terima Kasih Telah Berbisnis Dengan Kami!</h3>
-                <p style="margin: 5px 0; color: #666; font-size: 11px; line-height: 1.4;">
+                <h3 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 700;">Terima Kasih Telah Berbisnis Dengan Kami!</h3>
+                <p style="margin: 4px 0; color: #666; font-size: 10px; line-height: 1.3;">
                   Pembayaran jatuh tempo dalam 30 hari. Denda keterlambatan 2% per bulan. 
                   Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan 
                   kesepakatan yang telah ditandatangani.
                 </p>
               </div>
               <div style="text-align: right; color: #333;">
-                <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700;">Tanda Tangan</h3>
-                <p style="margin: 5px 0; color: #666; font-size: 14px;">Tim Quotation Apps</p>
-                <p style="margin: 5px 0; color: #666; font-size: 14px;">Manajer Akun</p>
-                <div style="display: flex; gap: 3px; justify-content: flex-end; margin-top: 10px;">
+                <h3 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 700;">Tanda Tangan</h3>
+                <p style="margin: 4px 0; color: #666; font-size: 14px;">Tim Quotation Apps</p>
+                <p style="margin: 4px 0; color: #666; font-size: 14px;">Manajer Akun</p>
+                <div style="display: flex; gap: 3px; justify-content: flex-end; margin-top: 8px;">
                   <div style="width: 8px; height: 25px; border-radius: 2px; background: #00d4aa;"></div>
                   <div style="width: 8px; height: 25px; border-radius: 2px; background: #ff6b35;"></div>
                   <div style="width: 8px; height: 25px; border-radius: 2px; background: #4ecdc4;"></div>
