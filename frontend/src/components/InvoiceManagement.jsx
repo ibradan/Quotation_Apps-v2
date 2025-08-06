@@ -421,8 +421,7 @@ function InvoiceManagement({ quotations }) {
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(7);
       pdf.setTextColor(102, 102, 102);
-      pdf.text('Pembayaran jatuh tempo dalam 30 hari. Denda keterlambatan 2% per bulan.', leftX, y + 15, { maxWidth: 70 });
-      pdf.text('Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan kesepakatan yang telah ditandatangani.', leftX, y + 22, { maxWidth: 70 });
+      pdf.text('Pembayaran jatuh tempo dalam 30 hari. Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan kesepakatan yang telah ditandatangani.', leftX, y + 15, { maxWidth: 70 });
       
       pdf.setFontSize(10);
       pdf.setTextColor(51, 51, 51);
