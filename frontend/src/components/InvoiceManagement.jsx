@@ -308,6 +308,7 @@ function InvoiceManagement({ quotations }) {
       pdf.text('Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.', rightX, y, { maxWidth: 70 });
       
       y += 8;
+      pdf.setFont('helvetica', 'bold');
       pdf.text(`ID Klien: CL-${Math.floor(Math.random() * 1000000)}`, rightX, y);
       y += 4;
       pdf.text(`No. Akun: ACC-${Math.floor(Math.random() * 1000000)}`, rightX, y);
