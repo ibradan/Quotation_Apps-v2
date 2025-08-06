@@ -92,11 +92,7 @@ const db = new sqlite3.Database('./quotation.db', (err) => {
 const addUnitColumn = () => {
   db.all("PRAGMA table_info(items)", (err, rows) => {
     if (rows && !rows.some(col => col.name === 'unit')) {
-      db.run("ALTER TABLE items ADD COLUMN unit TEXT", () => {
-        console.log('Kolom unit berhasil ditambahkan ke tabel items');
-      });
-    } else {
-      console.log('Kolom unit sudah ada di tabel items');
+      db.run("ALTER TABLE items ADD COLUMN unit TEXT");
     }
   });
 };
@@ -106,11 +102,7 @@ addUnitColumn();
 const addStockColumn = () => {
   db.all("PRAGMA table_info(items)", (err, rows) => {
     if (rows && !rows.some(col => col.name === 'stock')) {
-      db.run("ALTER TABLE items ADD COLUMN stock INTEGER DEFAULT 0", () => {
-        console.log('Kolom stock berhasil ditambahkan ke tabel items');
-      });
-    } else {
-      console.log('Kolom stock sudah ada di tabel items');
+      db.run("ALTER TABLE items ADD COLUMN stock INTEGER DEFAULT 0");
     }
   });
 };
@@ -120,11 +112,7 @@ addStockColumn();
 const addTitleColumn = () => {
   db.all("PRAGMA table_info(quotations)", (err, rows) => {
     if (rows && !rows.some(col => col.name === 'title')) {
-      db.run("ALTER TABLE quotations ADD COLUMN title TEXT DEFAULT 'PENAWARAN BARANG/JASA'", () => {
-        console.log('Kolom title berhasil ditambahkan ke tabel quotations');
-      });
-    } else {
-      console.log('Kolom title sudah ada di tabel quotations');
+      db.run("ALTER TABLE quotations ADD COLUMN title TEXT DEFAULT 'PENAWARAN BARANG/JASA'");
     }
   });
 };
@@ -134,11 +122,7 @@ addTitleColumn();
 const addDiscountColumn = () => {
   db.all("PRAGMA table_info(quotations)", (err, rows) => {
     if (rows && !rows.some(col => col.name === 'discount')) {
-      db.run("ALTER TABLE quotations ADD COLUMN discount REAL DEFAULT 0", () => {
-        console.log('Kolom discount berhasil ditambahkan ke tabel quotations');
-      });
-    } else {
-      console.log('Kolom discount sudah ada di tabel quotations');
+      db.run("ALTER TABLE quotations ADD COLUMN discount REAL DEFAULT 0");
     }
   });
 };
@@ -148,11 +132,7 @@ addDiscountColumn();
 const addTaxColumn = () => {
   db.all("PRAGMA table_info(quotations)", (err, rows) => {
     if (rows && !rows.some(col => col.name === 'tax')) {
-      db.run("ALTER TABLE quotations ADD COLUMN tax REAL DEFAULT 11", () => {
-        console.log('Kolom tax berhasil ditambahkan ke tabel quotations');
-      });
-    } else {
-      console.log('Kolom tax sudah ada di tabel quotations');
+      db.run("ALTER TABLE quotations ADD COLUMN tax REAL DEFAULT 11");
     }
   });
 };
@@ -162,11 +142,7 @@ addTaxColumn();
 const addQuotationNumberColumn = () => {
   db.all("PRAGMA table_info(quotations)", (err, rows) => {
     if (rows && !rows.some(col => col.name === 'quotation_number')) {
-      db.run("ALTER TABLE quotations ADD COLUMN quotation_number TEXT", () => {
-        console.log('Kolom quotation_number berhasil ditambahkan ke tabel quotations');
-      });
-    } else {
-      console.log('Kolom quotation_number sudah ada di tabel quotations');
+      db.run("ALTER TABLE quotations ADD COLUMN quotation_number TEXT");
     }
   });
 };
@@ -176,11 +152,7 @@ addQuotationNumberColumn();
 const addTotalColumn = () => {
   db.all("PRAGMA table_info(quotations)", (err, rows) => {
     if (rows && !rows.some(col => col.name === 'total')) {
-      db.run("ALTER TABLE quotations ADD COLUMN total REAL DEFAULT 0", () => {
-        console.log('Kolom total berhasil ditambahkan ke tabel quotations');
-      });
-    } else {
-      console.log('Kolom total sudah ada di tabel quotations');
+      db.run("ALTER TABLE quotations ADD COLUMN total REAL DEFAULT 0");
     }
   });
 };
@@ -224,8 +196,6 @@ const initSettings = () => {
       ], (err2) => {
         if (err2) {
           console.error('Error inserting default settings:', err2);
-        } else {
-          console.log('Default settings berhasil ditambahkan');
         }
       });
     }
@@ -536,30 +506,18 @@ app.post('/quotations', (req, res) => {
   // Handle both customer and customer_name fields
   const customerValue = customer || customer_name;
   
-  console.log('=== QUOTATION POST REQUEST ===');
-  console.log('Full request body:', JSON.stringify(req.body, null, 2));
-  console.log('Received data:', { customer: customerValue, date, status, itemsCount: items ? items.length : 0 });
-  
   // Simple validation
-  console.log('Validating customer:', customerValue);
   if (!customerValue || customerValue.trim() === '') {
-    console.log('ERROR: Customer validation failed');
     return res.status(400).json({ error: 'Customer harus diisi' });
   }
   
-  console.log('Validating date:', date);
   if (!date || date.trim() === '') {
-    console.log('ERROR: Date validation failed');
     return res.status(400).json({ error: 'Date harus diisi' });
   }
   
-  console.log('Validating status:', status);
   if (!status || status.trim() === '') {
-    console.log('ERROR: Status validation failed');
     return res.status(400).json({ error: 'Status harus diisi' });
   }
-  
-  console.log('All validations passed, proceeding with database insert...');
   
   db.run('INSERT INTO quotations (customer, date, status, title, quotation_number, discount, tax) VALUES (?, ?, ?, ?, ?, ?, ?)',
     [customerValue, date, status, title || 'PENAWARAN BARANG/JASA', quotation_number, discount || 0, tax || 11],

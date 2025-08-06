@@ -5,6 +5,49 @@
   min-height: 100vh;
 }
 
+/* Loading and Error States */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  font-size: 18px;
+  color: #d32f2f;
+  text-align: center;
+  padding: 20px;
+}
+
+.error-state > div:first-child {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.retry-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: var(--blue-500);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: var(--blue-600);
+}
+
 .invoice-header {
   margin-bottom: 32px;
 }

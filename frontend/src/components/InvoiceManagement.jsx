@@ -4,7 +4,7 @@ import './InvoiceManagement.css';
 
 const API_BASE_URL = 'http://localhost:3001';
 
-// Icon Components untuk Invoice
+// Icon Components
 const IconInvoice = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -44,14 +44,14 @@ const IconDownload = () => (
 );
 
 function InvoiceManagement({ quotations }) {
-  console.log('InvoiceManagement component rendered');
-  console.log('quotations prop:', quotations);
-  
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewInvoice, setPreviewInvoice] = useState(null);
+  
   const [formData, setFormData] = useState({
     customer: '',
     invoiceNumber: '',
@@ -66,10 +66,8 @@ function InvoiceManagement({ quotations }) {
     downPayment: 0,
     notes: ''
   });
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewInvoice, setPreviewInvoice] = useState(null);
 
-  // Generate nomor invoice otomatis
+  // Generate invoice number
   const generateInvoiceNumber = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -78,18 +76,15 @@ function InvoiceManagement({ quotations }) {
     return `INV-${year}${month}-${count.toString().padStart(3, '0')}`;
   };
 
-  // Load invoices from API
+  // Fetch invoices from API
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
         setLoading(true);
         setError(null);
-        console.log('Fetching invoices from API...');
         const response = await axios.get(`${API_BASE_URL}/invoices`);
-        console.log('Invoices loaded:', response.data);
         setInvoices(response.data);
       } catch (error) {
-        console.error('Error fetching invoices:', error);
         setError('Gagal memuat data invoice: ' + (error.response?.data?.error || error.message));
         setInvoices([]);
       } finally {
@@ -119,18 +114,15 @@ function InvoiceManagement({ quotations }) {
       };
 
       if (editingInvoice) {
-        // Update existing invoice
         await axios.put(`${API_BASE_URL}/invoices/${editingInvoice.id}`, invoiceData);
         setInvoices(prev => prev.map(inv => inv.id === editingInvoice.id ? { ...inv, ...invoiceData } : inv));
       } else {
-        // Create new invoice
         const response = await axios.post(`${API_BASE_URL}/invoices`, invoiceData);
         setInvoices(prev => [...prev, response.data]);
       }
 
       resetForm();
     } catch (error) {
-      console.error('Error saving invoice:', error);
       alert('Gagal menyimpan invoice: ' + (error.response?.data?.error || error.message));
     }
   };
@@ -178,7 +170,6 @@ function InvoiceManagement({ quotations }) {
         await axios.delete(`${API_BASE_URL}/invoices/${id}`);
         setInvoices(prev => prev.filter(inv => inv.id !== id));
       } catch (error) {
-        console.error('Error deleting invoice:', error);
         alert('Gagal menghapus invoice: ' + (error.response?.data?.error || error.message));
       }
     }
@@ -190,7 +181,6 @@ function InvoiceManagement({ quotations }) {
   };
 
   const handleDownloadPDF = (invoice) => {
-    console.log('Generating PDF for invoice:', invoice);
     try {
       // Create a professional HTML invoice similar to the design shown
       const invoiceHTML = `
@@ -571,10 +561,7 @@ function InvoiceManagement({ quotations }) {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
-      console.log('PDF generation completed');
     } catch (error) {
-      console.error('Error generating PDF:', error);
       alert('Error generating PDF: ' + error.message);
     }
   };
@@ -600,7 +587,7 @@ function InvoiceManagement({ quotations }) {
     }).format(amount);
   };
 
-  // Show loading state
+  // Loading and error states
   if (loading) {
     return (
       <div className="invoice-management">
@@ -615,21 +602,13 @@ function InvoiceManagement({ quotations }) {
             </div>
           </div>
         </div>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '400px',
-          fontSize: '18px',
-          color: '#666'
-        }}>
+        <div className="loading-state">
           Loading invoice data...
         </div>
       </div>
     );
   }
 
-  // Show error state
   if (error) {
     return (
       <div className="invoice-management">
@@ -644,34 +623,12 @@ function InvoiceManagement({ quotations }) {
             </div>
           </div>
         </div>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '400px',
-          fontSize: '18px',
-          color: '#d32f2f',
-          textAlign: 'center',
-          padding: '20px'
-        }}>
-          <div>
-            <div style={{ marginBottom: '10px' }}>❌ Error</div>
-            <div>{error}</div>
-            <button 
-              onClick={() => window.location.reload()} 
-              style={{
-                marginTop: '20px',
-                padding: '10px 20px',
-                background: '#1a73e8',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              Coba Lagi
-            </button>
-          </div>
+        <div className="error-state">
+          <div>❌ Error</div>
+          <div>{error}</div>
+          <button onClick={() => window.location.reload()} className="retry-btn">
+            Coba Lagi
+          </button>
         </div>
       </div>
     );

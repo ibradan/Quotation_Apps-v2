@@ -89,11 +89,8 @@ const IconPlus = () => (
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('dashboard');
-  // Default collapsed untuk mobile, expanded untuk desktop
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth <= 768);
   const [pageTransition, setPageTransition] = useState('entered');
-  
-
   
   // Custom hooks untuk state management
   const quotations = useQuotations();
