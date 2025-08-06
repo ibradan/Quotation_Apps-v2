@@ -1516,7 +1516,6 @@ app.get('/export/invoice/:id', (req, res) => {
     });
   });
 });
-});
 
 // Global error handler
 app.use((error, req, res, next) => {
