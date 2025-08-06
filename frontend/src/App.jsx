@@ -270,10 +270,6 @@ function AppContent() {
                 <span className="version-label">Version</span>
                 <span className="version-number">v1.0.0</span>
               </div>
-              <div className="footer-links">
-                <button className="footer-link">Help</button>
-                <button className="footer-link">About</button>
-              </div>
             </div>
           )}
           {sidebarCollapsed && (
