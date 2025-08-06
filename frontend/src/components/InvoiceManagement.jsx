@@ -184,399 +184,272 @@ function InvoiceManagement({ quotations }) {
 
   const handleDownloadPDF = async (invoice) => {
     try {
-      // Create a dedicated PDF generation service
-      const generatePDFContent = () => {
-        return `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <title>Invoice - ${invoice.invoice_number || invoice.invoiceNumber}</title>
-            <style>
-              @page {
-                size: A4;
-                margin: 0;
-              }
-              body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background: #4ecdc4;
-              }
-              .invoice-container {
-                background: white;
-                border-radius: 15px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                margin: 40px auto;
-                max-width: 800px;
-                overflow: hidden;
-              }
-              .header {
-                padding: 20px;
-                border-bottom: 2px solid #f0f0f0;
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-              }
-              .logo-section {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-              }
-              .color-bars {
-                display: flex;
-                gap: 3px;
-              }
-              .color-bar {
-                width: 8px;
-                height: 25px;
-                border-radius: 2px;
-              }
-              .bar-green { background: #00d4aa; }
-              .bar-orange { background: #ff6b35; }
-              .bar-teal { background: #4ecdc4; }
-              .bar-blue { background: #45b7d1; }
-              .company-info h2 {
-                margin: 0;
-                color: #333;
-                font-size: 24px;
-                font-weight: 700;
-              }
-              .company-info p {
-                margin: 5px 0 0 0;
-                color: #666;
-                font-size: 14px;
-              }
-              .invoice-header {
-                background: white;
-                color: #333;
-                padding: 15px;
-                border-radius: 10px;
-                text-align: center;
-                min-width: 200px;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-              }
-              .invoice-header h1 {
-                margin: 0 0 8px 0;
-                font-size: 28px;
-                font-weight: 800;
-                text-transform: uppercase;
-              }
-              .invoice-header h3 {
-                margin: 0 0 12px 0;
-                font-size: 16px;
-                font-weight: 600;
-              }
-              .invoice-details {
-                font-size: 12px;
-                line-height: 1.4;
-              }
-              .invoice-details p {
-                margin: 3px 0;
-              }
-              .total-amount {
-                font-size: 18px;
-                font-weight: 700;
-                margin-top: 8px;
-                color: #ff4757;
-              }
-              .content {
-                padding: 20px;
-              }
-              .info-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 25px;
-                margin-bottom: 20px;
-              }
-              .section-title {
-                color: #4ecdc4;
-                margin: 0 0 8px 0;
-                font-size: 18px;
-                font-weight: 600;
-              }
-              .customer-name {
-                font-size: 18px;
-                font-weight: 700;
-                color: #333;
-                margin: 6px 0;
-              }
-              .info-text {
-                margin: 4px 0;
-                color: #333;
-                font-size: 14px;
-              }
-              .divider {
-                height: 1px;
-                background: #f0f0f0;
-                margin: 12px 0;
-              }
-              .items-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 15px 0;
-              }
-              .items-table th {
-                padding: 10px;
-                text-align: left;
-                font-weight: 600;
-                color: #333;
-                border-bottom: 2px solid #e9ecef;
-                background: #f8f9fa;
-              }
-              .items-table td {
-                padding: 10px;
-                border-bottom: 1px solid #f0f0f0;
-                color: #333;
-              }
-              .items-table td.text-center { text-align: center; }
-              .items-table td.text-right { text-align: right; }
-              .items-table td.font-bold { font-weight: 700; }
-              .item-title {
-                font-weight: 600;
-                color: #333;
-              }
-              .item-description {
-                color: #666;
-                font-size: 12px;
-                margin-top: 2px;
-              }
-              .summary-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-                margin-top: 15px;
-              }
-              .payment-methods {
-                display: flex;
-                gap: 6px;
-                margin-bottom: 8px;
-              }
-              .payment-square {
-                width: 20px;
-                height: 12px;
-                border-radius: 4px;
-              }
-              .summary-row {
-                display: flex;
-                justify-content: space-between;
-                margin: 4px 0;
-                font-size: 14px;
-              }
-              .total-row {
-                display: flex;
-                justify-content: space-between;
-                margin: 4px 0;
-                font-size: 16px;
-                font-weight: 800;
-                color: #ff4757;
-                border-top: 2px solid #f0f0f0;
-                padding-top: 6px;
-                margin-top: 6px;
-              }
-              .footer {
-                padding: 15px;
-                background: #f8f9fa;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-              }
-              .footer h3 {
-                margin: 0 0 6px 0;
-                font-size: 14px;
-                font-weight: 700;
-                color: #333;
-              }
-              .footer p {
-                margin: 4px 0;
-                color: #666;
-                font-size: 10px;
-                line-height: 1.3;
-              }
-              .footer .signature-text {
-                font-size: 14px;
-              }
-              .signature-bars {
-                display: flex;
-                gap: 3px;
-                justify-content: flex-end;
-                margin-top: 8px;
-              }
-              .signature-bar {
-                width: 8px;
-                height: 25px;
-                border-radius: 2px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="invoice-container">
-              <!-- Header -->
-              <div class="header">
-                <div class="logo-section">
-                  <div class="color-bars">
-                    <div class="color-bar bar-green"></div>
-                    <div class="color-bar bar-orange"></div>
-                    <div class="color-bar bar-teal"></div>
-                    <div class="color-bar bar-blue"></div>
-                  </div>
-                  <div class="company-info">
-                    <h2>Quotation Apps</h2>
-                    <p>Solusi Bisnis Profesional</p>
-                  </div>
-                </div>
-                <div class="invoice-header">
-                  <h1>INVOICE</h1>
-                  <h3>Detail Invoice</h3>
-                  <div class="invoice-details">
-                    <p><strong>No. Invoice:</strong> ${invoice.invoice_number || invoice.invoiceNumber}</p>
-                    <p><strong>Tanggal:</strong> ${new Date(invoice.date || invoice.invoiceDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                    <p><strong>Status:</strong> ${invoice.status}</p>
-                    <div class="total-amount">
-                      Total: ${formatCurrency(invoice.total || invoice.totalAmount || 0)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Content -->
-              <div class="content">
-                <div class="info-grid">
-                  <div>
-                    <h3 class="section-title">Tagihan Kepada</h3>
-                    <div class="customer-name">${invoice.customer}</div>
-                    <p class="info-text">Pelanggan</p>
-                    <p class="info-text">Telepon: +62 21 1234 5678</p>
-                    <p class="info-text">Email: customer@example.com</p>
-                  </div>
-                  <div>
-                    <h3 class="section-title">Proyek</h3>
-                    <p class="info-text">Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.</p>
-                    <div class="divider"></div>
-                    <p class="info-text"><strong>ID Klien:</strong> CL-${Math.floor(Math.random() * 1000000)}</p>
-                    <p class="info-text"><strong>No. Akun:</strong> ACC-${Math.floor(Math.random() * 1000000)}</p>
-                  </div>
-                </div>
-                
-                <!-- Items Table -->
-                <table class="items-table">
-                  <thead>
-                    <tr>
-                      <th>NO</th>
-                      <th>DESKRIPSI ITEM</th>
-                      <th>QTY</th>
-                      <th>HARGA</th>
-                      <th>JUMLAH</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td>
-                        <div class="item-title">Layanan Profesional</div>
-                        <div class="item-description">Solusi bisnis komprehensif dan layanan konsultasi yang disediakan sesuai dengan persyaratan proyek.</div>
-                      </td>
-                      <td class="text-center">1</td>
-                      <td class="text-right">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
-                      <td class="text-right font-bold">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                
-                <!-- Summary -->
-                <div class="summary-grid">
-                  <div>
-                    <h3 class="section-title">Metode Pembayaran</h3>
-                    <div class="payment-methods">
-                      <div class="payment-square bar-green"></div>
-                      <div class="payment-square bar-orange"></div>
-                      <div class="payment-square bar-teal"></div>
-                      <div class="payment-square" style="background: #ff4757;"></div>
-                    </div>
-                    <p class="info-text"><strong>Transfer Bank:</strong> 1234-5678-9012-3456</p>
-                    <p class="info-text"><strong>PayPal:</strong> payment@quotationapps.com</p>
-                  </div>
-                  <div style="text-align: right;">
-                    <div class="summary-row">
-                      <span>Sub-Total:</span>
-                      <span>${formatCurrency(invoice.total || invoice.totalAmount || 0)}</span>
-                    </div>
-                    <div class="summary-row">
-                      <span>Pajak (11%):</span>
-                      <span>${formatCurrency((invoice.total || invoice.totalAmount || 0) * 0.11)}</span>
-                    </div>
-                    <div class="summary-row">
-                      <span>Diskon (10%):</span>
-                      <span>-${formatCurrency((invoice.total || invoice.totalAmount || 0) * 0.10)}</span>
-                    </div>
-                    <div class="summary-row">
-                      <span>DP (Down Payment):</span>
-                      <span>-${formatCurrency(invoice.down_payment || 0)}</span>
-                    </div>
-                    <div class="total-row">
-                      <span>TOTAL:</span>
-                      <span>${formatCurrency((invoice.total || invoice.totalAmount || 0) - (invoice.down_payment || 0))}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Footer -->
-              <div class="footer">
-                <div>
-                  <h3>Terima Kasih Telah Berbisnis Dengan Kami!</h3>
-                  <p>
-                    Pembayaran jatuh tempo dalam 30 hari. Denda keterlambatan 2% per bulan. 
-                    Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan 
-                    kesepakatan yang telah ditandatangani.
-                  </p>
-                </div>
-                <div style="text-align: right;">
-                  <h3>Tanda Tangan</h3>
-                  <p class="signature-text">Tim Quotation Apps</p>
-                  <p class="signature-text">Manajer Akun</p>
-                  <div class="signature-bars">
-                    <div class="signature-bar bar-green"></div>
-                    <div class="signature-bar bar-orange"></div>
-                    <div class="signature-bar bar-teal"></div>
-                    <div class="signature-bar bar-blue"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </body>
-          </html>
-        `;
-      };
-
-      // Create a blob URL for the HTML content
-      const htmlContent = generatePDFContent();
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-
-      // Open in new window for printing
-      const printWindow = window.open(url, '_blank');
+      // Create a professional PDF using jsPDF with better styling
+      const { jsPDF } = await import('jspdf');
       
-      if (printWindow) {
-        printWindow.onload = () => {
-          printWindow.print();
-          // Clean up after printing
-          setTimeout(() => {
-            URL.revokeObjectURL(url);
-            printWindow.close();
-          }, 1000);
-        };
-      } else {
-        // Fallback: download as HTML file
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `invoice_${invoice.invoice_number || invoice.invoiceNumber}.html`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }
-
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      // Set font
+      pdf.setFont('helvetica');
+      
+      // Background color for the page
+      pdf.setFillColor(78, 205, 196); // #4ecdc4
+      pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+      
+      // White invoice container
+      const containerWidth = 180;
+      const containerHeight = 250;
+      const containerX = (pageWidth - containerWidth) / 2;
+      const containerY = 20;
+      
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(containerX, containerY, containerWidth, containerHeight, 3, 3, 'F');
+      
+      // Header
+      let y = containerY + 15;
+      
+      // Logo bars
+      const barColors = [
+        [0, 212, 170],   // #00d4aa
+        [255, 107, 53],  // #ff6b35
+        [78, 205, 196],  // #4ecdc4
+        [69, 183, 209]   // #45b7d1
+      ];
+      
+      let x = containerX + 15;
+      barColors.forEach((color, index) => {
+        pdf.setFillColor(color[0], color[1], color[2]);
+        pdf.rect(x + (index * 3), y, 2, 8, 'F');
+      });
+      
+      // Company name
+      pdf.setFontSize(18);
+      pdf.setTextColor(51, 51, 51);
+      pdf.text('Quotation Apps', x + 20, y + 6);
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(102, 102, 102);
+      pdf.text('Solusi Bisnis Profesional', x + 20, y + 12);
+      
+      // Invoice header box
+      const headerBoxWidth = 60;
+      const headerBoxX = containerX + containerWidth - headerBoxWidth - 15;
+      
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(headerBoxX, y - 5, headerBoxWidth, 35, 2, 2, 'F');
+      
+      pdf.setFontSize(16);
+      pdf.setTextColor(51, 51, 51);
+      pdf.text('INVOICE', headerBoxX + headerBoxWidth/2, y + 2, { align: 'center' });
+      
+      pdf.setFontSize(10);
+      pdf.text('Detail Invoice', headerBoxX + headerBoxWidth/2, y + 8, { align: 'center' });
+      
+      pdf.setFontSize(8);
+      pdf.setTextColor(102, 102, 102);
+      pdf.text(`No. Invoice: ${invoice.invoice_number || invoice.invoiceNumber}`, headerBoxX + 5, y + 15);
+      pdf.text(`Tanggal: ${new Date(invoice.date || invoice.invoiceDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`, headerBoxX + 5, y + 18);
+      pdf.text(`Status: ${invoice.status}`, headerBoxX + 5, y + 21);
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(255, 71, 87);
+      pdf.text(`Total: ${formatCurrency(invoice.total || invoice.totalAmount || 0)}`, headerBoxX + headerBoxWidth/2, y + 28, { align: 'center' });
+      
+      // Divider
+      y += 40;
+      pdf.setDrawColor(240, 240, 240);
+      pdf.line(containerX + 15, y, containerX + containerWidth - 15, y);
+      
+      // Content sections
+      y += 15;
+      
+      // Left column - Customer info
+      const leftX = containerX + 15;
+      const rightX = containerX + containerWidth/2 + 5;
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(78, 205, 196);
+      pdf.text('Tagihan Kepada', leftX, y);
+      
+      y += 8;
+      pdf.setFontSize(12);
+      pdf.setTextColor(51, 51, 51);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(invoice.customer, leftX, y);
+      
+      y += 6;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.text('Pelanggan', leftX, y);
+      y += 4;
+      pdf.text('Telepon: +62 21 1234 5678', leftX, y);
+      y += 4;
+      pdf.text('Email: customer@example.com', leftX, y);
+      
+      // Right column - Project info
+      y -= 18;
+      pdf.setTextColor(78, 205, 196);
+      pdf.setFontSize(12);
+      pdf.text('Proyek', rightX, y);
+      
+      y += 8;
+      pdf.setTextColor(51, 51, 51);
+      pdf.setFontSize(9);
+      pdf.text('Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.', rightX, y, { maxWidth: 70 });
+      
+      y += 8;
+      pdf.text(`ID Klien: CL-${Math.floor(Math.random() * 1000000)}`, rightX, y);
+      y += 4;
+      pdf.text(`No. Akun: ACC-${Math.floor(Math.random() * 1000000)}`, rightX, y);
+      
+      // Items table
+      y += 15;
+      pdf.setDrawColor(224, 224, 224);
+      pdf.line(containerX + 15, y, containerX + containerWidth - 15, y);
+      
+      y += 8;
+      pdf.setFontSize(10);
+      pdf.setTextColor(51, 51, 51);
+      pdf.setFont('helvetica', 'bold');
+      
+      // Table headers
+      const colWidths = [10, 60, 15, 25, 25];
+      let colX = containerX + 15;
+      
+      pdf.text('NO', colX, y);
+      colX += colWidths[0];
+      pdf.text('DESKRIPSI ITEM', colX, y);
+      colX += colWidths[1];
+      pdf.text('QTY', colX, y);
+      colX += colWidths[2];
+      pdf.text('HARGA', colX, y);
+      colX += colWidths[3];
+      pdf.text('JUMLAH', colX, y);
+      
+      y += 8;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      
+      // Table row
+      colX = containerX + 15;
+      pdf.text('1', colX, y);
+      colX += colWidths[0];
+      pdf.text('Layanan Profesional', colX, y);
+      colX += colWidths[1];
+      pdf.text('1', colX, y);
+      colX += colWidths[2];
+      pdf.text(formatCurrency(invoice.total || invoice.totalAmount || 0), colX, y);
+      colX += colWidths[3];
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(formatCurrency(invoice.total || invoice.totalAmount || 0), colX, y);
+      
+      // Summary section
+      y += 20;
+      
+      // Left - Payment methods
+      pdf.setFontSize(10);
+      pdf.setTextColor(78, 205, 196);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Metode Pembayaran', leftX, y);
+      
+      y += 6;
+      // Payment method bars
+      let barX = leftX;
+      barColors.forEach((color, index) => {
+        pdf.setFillColor(color[0], color[1], color[2]);
+        pdf.rect(barX, y, 4, 3, 'F');
+        barX += 5;
+      });
+      
+      y += 6;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      pdf.setTextColor(51, 51, 51);
+      pdf.text('Transfer Bank: 1234-5678-9012-3456', leftX, y);
+      y += 4;
+      pdf.text('PayPal: payment@quotationapps.com', leftX, y);
+      
+      // Right - Financial summary
+      y -= 12;
+      const summaryX = rightX;
+      
+      pdf.setFontSize(8);
+      pdf.setTextColor(51, 51, 51);
+      
+      const subtotal = invoice.total || invoice.totalAmount || 0;
+      const tax = subtotal * 0.11;
+      const discount = subtotal * 0.10;
+      const dp = invoice.down_payment || 0;
+      const total = subtotal - dp;
+      
+      pdf.text('Sub-Total:', summaryX, y);
+      pdf.text(formatCurrency(subtotal), summaryX + 40, y, { align: 'right' });
+      y += 4;
+      
+      pdf.text('Pajak (11%):', summaryX, y);
+      pdf.text(formatCurrency(tax), summaryX + 40, y, { align: 'right' });
+      y += 4;
+      
+      pdf.text('Diskon (10%):', summaryX, y);
+      pdf.text(`-${formatCurrency(discount)}`, summaryX + 40, y, { align: 'right' });
+      y += 4;
+      
+      pdf.text('DP (Down Payment):', summaryX, y);
+      pdf.text(`-${formatCurrency(dp)}`, summaryX + 40, y, { align: 'right' });
+      y += 6;
+      
+      // Total line
+      pdf.setDrawColor(224, 224, 224);
+      pdf.line(summaryX, y, summaryX + 50, y);
+      y += 4;
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(255, 71, 87);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('TOTAL:', summaryX, y);
+      pdf.text(formatCurrency(total), summaryX + 40, y, { align: 'right' });
+      
+      // Footer
+      y += 15;
+      pdf.setFillColor(248, 249, 250);
+      pdf.rect(containerX + 15, y, containerWidth - 30, 30, 'F');
+      
+      // Left footer
+      pdf.setFontSize(10);
+      pdf.setTextColor(51, 51, 51);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Terima Kasih Telah Berbisnis Dengan Kami!', leftX, y + 8);
+      
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(7);
+      pdf.setTextColor(102, 102, 102);
+      pdf.text('Pembayaran jatuh tempo dalam 30 hari. Denda keterlambatan 2% per bulan.', leftX, y + 15, { maxWidth: 70 });
+      pdf.text('Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan kesepakatan yang telah ditandatangani.', leftX, y + 22, { maxWidth: 70 });
+      
+      // Right footer
+      pdf.setFontSize(10);
+      pdf.setTextColor(51, 51, 51);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Tanda Tangan', rightX, y + 8);
+      
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      pdf.setTextColor(102, 102, 102);
+      pdf.text('Tim Quotation Apps', rightX, y + 15);
+      pdf.text('Manajer Akun', rightX, y + 19);
+      
+      // Signature bars
+      barX = rightX + 40;
+      barColors.forEach((color, index) => {
+        pdf.setFillColor(color[0], color[1], color[2]);
+        pdf.rect(barX + (index * 3), y + 12, 2, 8, 'F');
+      });
+      
+      // Save the PDF
+      pdf.save(`invoice_${invoice.invoice_number || invoice.invoiceNumber}.pdf`);
+      
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF: ' + error.message);
