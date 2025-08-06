@@ -184,15 +184,163 @@ function InvoiceManagement({ quotations }) {
 
   const handleDownloadPDF = async (invoice) => {
     try {
-      const element = document.getElementById('invoice-preview-content');
-      if (!element) {
-        alert('Invoice content not found for PDF generation.');
-        return;
-      }
-
-      const canvas = await html2canvas(element, { scale: 2 });
+      // Create a temporary hidden element for PDF generation
+      const tempDiv = document.createElement('div');
+      tempDiv.id = 'invoice-pdf-content';
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.width = '800px';
+      tempDiv.style.background = 'white';
+      tempDiv.style.padding = '20px';
+      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      tempDiv.style.fontSize = '12px';
+      tempDiv.style.color = '#333';
+      
+      // Generate invoice HTML content
+      const invoiceHTML = `
+        <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+          <!-- Header -->
+          <div style="padding: 30px; border-bottom: 2px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <div style="display: flex; gap: 3px;">
+                <div style="width: 8px; height: 25px; border-radius: 2px; background: #00d4aa;"></div>
+                <div style="width: 8px; height: 25px; border-radius: 2px; background: #ff6b35;"></div>
+                <div style="width: 8px; height: 25px; border-radius: 2px; background: #4ecdc4;"></div>
+                <div style="width: 8px; height: 25px; border-radius: 2px; background: #45b7d1;"></div>
+              </div>
+              <div>
+                <h2 style="margin: 0; color: #333; font-size: 24px; font-weight: 700;">Quotation Apps</h2>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Solusi Bisnis Profesional</p>
+              </div>
+            </div>
+            <div style="background: white; color: #333; padding: 20px; border-radius: 10px; text-align: center; min-width: 200px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+              <h1 style="margin: 0 0 10px 0; font-size: 28px; font-weight: 800; text-transform: uppercase;">INVOICE</h1>
+              <h3 style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">Detail Invoice</h3>
+              <div style="font-size: 12px; line-height: 1.6;">
+                <p style="margin: 5px 0;"><strong>No. Invoice:</strong> ${invoice.invoice_number || invoice.invoiceNumber}</p>
+                <p style="margin: 5px 0;"><strong>Tanggal:</strong> ${new Date(invoice.date || invoice.invoiceDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                <p style="margin: 5px 0;"><strong>Status:</strong> ${invoice.status}</p>
+                <div style="font-size: 18px; font-weight: 700; margin-top: 10px; color: #ff4757;">
+                  Total: ${formatCurrency(invoice.total || invoice.totalAmount || 0)}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 30px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+              <div>
+                <h3 style="color: #4ecdc4; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Tagihan Kepada</h3>
+                <div style="font-size: 18px; font-weight: 700; color: #333; margin: 10px 0;">${invoice.customer}</div>
+                <div style="color: #666; line-height: 1.6;">
+                  <p style="margin: 5px 0;">Alamat: ${invoice.customer_address || 'N/A'}</p>
+                  <p style="margin: 5px 0;">Email: ${invoice.customer_email || 'N/A'}</p>
+                  <p style="margin: 5px 0;">Telp: ${invoice.customer_phone || 'N/A'}</p>
+                </div>
+              </div>
+              <div>
+                <h3 style="color: #4ecdc4; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Informasi Pembayaran</h3>
+                <div style="color: #666; line-height: 1.6;">
+                  <p style="margin: 5px 0;"><strong>Metode:</strong> ${invoice.payment_method || 'Transfer Bank'}</p>
+                  <p style="margin: 5px 0;"><strong>Rekening:</strong> ${invoice.bank_account || 'N/A'}</p>
+                  <p style="margin: 5px 0;"><strong>Jatuh Tempo:</strong> ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('id-ID') : 'N/A'}</p>
+                  <p style="margin: 5px 0;"><strong>Terms:</strong> ${invoice.payment_terms || 'Net 30'}</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Items Table -->
+            <div style="margin-bottom: 30px;">
+              <h3 style="color: #4ecdc4; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Detail Barang/Jasa</h3>
+              <table style="width: 100%; border-collapse: collapse; border: 1px solid #e0e0e0;">
+                <thead>
+                  <tr style="background: #f8f9fa;">
+                    <th style="padding: 12px; text-align: left; border: 1px solid #e0e0e0; font-weight: 600;">No</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #e0e0e0; font-weight: 600;">Deskripsi</th>
+                    <th style="padding: 12px; text-align: center; border: 1px solid #e0e0e0; font-weight: 600;">Qty</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #e0e0e0; font-weight: 600;">Harga</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #e0e0e0; font-weight: 600;">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${invoice.items ? invoice.items.map((item, index) => `
+                    <tr>
+                      <td style="padding: 12px; border: 1px solid #e0e0e0;">${index + 1}</td>
+                      <td style="padding: 12px; border: 1px solid #e0e0e0;">${item.description || item.name}</td>
+                      <td style="padding: 12px; text-align: center; border: 1px solid #e0e0e0;">${item.quantity || 1}</td>
+                      <td style="padding: 12px; text-align: right; border: 1px solid #e0e0e0;">${formatCurrency(item.price || 0)}</td>
+                      <td style="padding: 12px; text-align: right; border: 1px solid #e0e0e0;">${formatCurrency((item.price || 0) * (item.quantity || 1))}</td>
+                    </tr>
+                  `).join('') : `
+                    <tr>
+                      <td style="padding: 12px; border: 1px solid #e0e0e0;">1</td>
+                      <td style="padding: 12px; border: 1px solid #e0e0e0;">${invoice.title || 'Barang/Jasa'}</td>
+                      <td style="padding: 12px; text-align: center; border: 1px solid #e0e0e0;">1</td>
+                      <td style="padding: 12px; text-align: right; border: 1px solid #e0e0e0;">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
+                      <td style="padding: 12px; text-align: right; border: 1px solid #e0e0e0;">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
+                    </tr>
+                  `}
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Summary -->
+            <div style="display: flex; justify-content: flex-end;">
+              <div style="width: 300px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span>Subtotal:</span>
+                  <span>${formatCurrency(invoice.subtotal || invoice.total || invoice.totalAmount || 0)}</span>
+                </div>
+                ${invoice.discount_rate && invoice.discount_rate > 0 ? `
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Diskon (${invoice.discount_rate}%):</span>
+                    <span>-${formatCurrency((invoice.subtotal || invoice.total || invoice.totalAmount || 0) * (invoice.discount_rate / 100))}</span>
+                  </div>
+                ` : ''}
+                ${invoice.tax_rate && invoice.tax_rate > 0 ? `
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>PPN (${invoice.tax_rate}%):</span>
+                    <span>${formatCurrency((invoice.subtotal || invoice.total || invoice.totalAmount || 0) * (invoice.tax_rate / 100))}</span>
+                  </div>
+                ` : ''}
+                ${invoice.down_payment && invoice.down_payment > 0 ? `
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>DP (Down Payment):</span>
+                    <span>-${formatCurrency(invoice.down_payment)}</span>
+                  </div>
+                ` : ''}
+                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; border-top: 2px solid #e0e0e0; padding-top: 10px;">
+                  <span>TOTAL:</span>
+                  <span style="color: #ff4757;">${formatCurrency((invoice.total || invoice.totalAmount || 0) - (invoice.down_payment || 0))}</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Notes -->
+            ${invoice.notes ? `
+              <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                <h4 style="margin: 0 0 10px 0; color: #4ecdc4;">Catatan:</h4>
+                <p style="margin: 0; color: #666; line-height: 1.6;">${invoice.notes}</p>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+      
+      tempDiv.innerHTML = invoiceHTML;
+      document.body.appendChild(tempDiv);
+      
+      // Generate PDF
+      const canvas = await html2canvas(tempDiv, { 
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+      
       const imgData = canvas.toDataURL('image/png');
-
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
@@ -211,7 +359,11 @@ function InvoiceManagement({ quotations }) {
       }
 
       pdf.save(`invoice_${invoice.invoice_number || invoice.invoiceNumber}.pdf`);
+      
+      // Clean up
+      document.body.removeChild(tempDiv);
     } catch (error) {
+      console.error('Error generating PDF:', error);
       alert('Error generating PDF: ' + error.message);
     }
   };
