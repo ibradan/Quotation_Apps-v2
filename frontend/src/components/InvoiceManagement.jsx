@@ -199,9 +199,9 @@ function InvoiceManagement({ quotations }) {
       
       // Generate invoice HTML content
       const invoiceHTML = `
-        <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-family: Arial, sans-serif; color: #333; max-width: 800px; margin: 0 auto;">
           <!-- Header -->
-          <div style="padding: 30px; border-bottom: 2px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start;">
+          <div style="padding: 0 0 30px 0; border-bottom: 2px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
             <div style="display: flex; align-items: center; gap: 15px;">
               <div style="display: flex; gap: 3px;">
                 <div style="width: 8px; height: 25px; border-radius: 2px; background: #00d4aa;"></div>
@@ -214,14 +214,14 @@ function InvoiceManagement({ quotations }) {
                 <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Solusi Bisnis Profesional</p>
               </div>
             </div>
-            <div style="background: white; color: #333; padding: 20px; border-radius: 10px; text-align: center; min-width: 200px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-              <h1 style="margin: 0 0 10px 0; font-size: 28px; font-weight: 800; text-transform: uppercase;">INVOICE</h1>
-              <h3 style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">Detail Invoice</h3>
-              <div style="font-size: 12px; line-height: 1.6;">
+            <div style="text-align: right;">
+              <h1 style="margin: 0 0 10px 0; font-size: 32px; font-weight: 800; color: #333; text-transform: uppercase;">INVOICE</h1>
+              <h3 style="margin: 0 0 20px 0; font-size: 16px; font-weight: 600; color: #333;">Detail Invoice</h3>
+              <div style="font-size: 12px; line-height: 1.6; color: #666;">
                 <p style="margin: 5px 0;"><strong>No. Invoice:</strong> ${invoice.invoice_number || invoice.invoiceNumber}</p>
                 <p style="margin: 5px 0;"><strong>Tanggal:</strong> ${new Date(invoice.date || invoice.invoiceDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                 <p style="margin: 5px 0;"><strong>Status:</strong> ${invoice.status}</p>
-                <div style="font-size: 18px; font-weight: 700; margin-top: 10px; color: #ff4757;">
+                <div style="font-size: 18px; font-weight: 700; margin-top: 15px; color: #ff4757;">
                   Total: ${formatCurrency(invoice.total || invoice.totalAmount || 0)}
                 </div>
               </div>
@@ -229,12 +229,12 @@ function InvoiceManagement({ quotations }) {
           </div>
           
           <!-- Content -->
-          <div style="padding: 30px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+          <div style="padding: 0;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px;">
               <div>
                 <h3 style="color: #4ecdc4; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Tagihan Kepada</h3>
                 <div style="font-size: 18px; font-weight: 700; color: #333; margin: 10px 0;">${invoice.customer}</div>
-                <div style="color: #666; line-height: 1.6;">
+                <div style="color: #666; line-height: 1.6; font-size: 14px;">
                   <p style="margin: 5px 0;">Alamat: ${invoice.customer_address || 'N/A'}</p>
                   <p style="margin: 5px 0;">Email: ${invoice.customer_email || 'N/A'}</p>
                   <p style="margin: 5px 0;">Telp: ${invoice.customer_phone || 'N/A'}</p>
@@ -242,7 +242,7 @@ function InvoiceManagement({ quotations }) {
               </div>
               <div>
                 <h3 style="color: #4ecdc4; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Informasi Pembayaran</h3>
-                <div style="color: #666; line-height: 1.6;">
+                <div style="color: #666; line-height: 1.6; font-size: 14px;">
                   <p style="margin: 5px 0;"><strong>Metode:</strong> ${invoice.payment_method || 'Transfer Bank'}</p>
                   <p style="margin: 5px 0;"><strong>Rekening:</strong> ${invoice.bank_account || 'N/A'}</p>
                   <p style="margin: 5px 0;"><strong>Jatuh Tempo:</strong> ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('id-ID') : 'N/A'}</p>
@@ -252,34 +252,34 @@ function InvoiceManagement({ quotations }) {
             </div>
             
             <!-- Items Table -->
-            <div style="margin-bottom: 30px;">
-              <h3 style="color: #4ecdc4; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Detail Barang/Jasa</h3>
-              <table style="width: 100%; border-collapse: collapse; border: 1px solid #e0e0e0;">
+            <div style="margin-bottom: 40px;">
+              <h3 style="color: #4ecdc4; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">Detail Barang/Jasa</h3>
+              <table style="width: 100%; border-collapse: collapse; border: 1px solid #e0e0e0; background: white;">
                 <thead>
                   <tr style="background: #f8f9fa;">
-                    <th style="padding: 12px; text-align: left; border: 1px solid #e0e0e0; font-weight: 600;">No</th>
-                    <th style="padding: 12px; text-align: left; border: 1px solid #e0e0e0; font-weight: 600;">Deskripsi</th>
-                    <th style="padding: 12px; text-align: center; border: 1px solid #e0e0e0; font-weight: 600;">Qty</th>
-                    <th style="padding: 12px; text-align: right; border: 1px solid #e0e0e0; font-weight: 600;">Harga</th>
-                    <th style="padding: 12px; text-align: right; border: 1px solid #e0e0e0; font-weight: 600;">Total</th>
+                    <th style="padding: 15px; text-align: left; border: 1px solid #e0e0e0; font-weight: 600; font-size: 14px; color: #333;">No</th>
+                    <th style="padding: 15px; text-align: left; border: 1px solid #e0e0e0; font-weight: 600; font-size: 14px; color: #333;">DESKRIPSI BARANG/JASA</th>
+                    <th style="padding: 15px; text-align: center; border: 1px solid #e0e0e0; font-weight: 600; font-size: 14px; color: #333;">QTY</th>
+                    <th style="padding: 15px; text-align: right; border: 1px solid #e0e0e0; font-weight: 600; font-size: 14px; color: #333;">HARGA</th>
+                    <th style="padding: 15px; text-align: right; border: 1px solid #e0e0e0; font-weight: 600; font-size: 14px; color: #333;">TOTAL</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${invoice.items ? invoice.items.map((item, index) => `
                     <tr>
-                      <td style="padding: 12px; border: 1px solid #e0e0e0;">${index + 1}</td>
-                      <td style="padding: 12px; border: 1px solid #e0e0e0;">${item.description || item.name}</td>
-                      <td style="padding: 12px; text-align: center; border: 1px solid #e0e0e0;">${item.quantity || 1}</td>
-                      <td style="padding: 12px; text-align: right; border: 1px solid #e0e0e0;">${formatCurrency(item.price || 0)}</td>
-                      <td style="padding: 12px; text-align: right; border: 1px solid #e0e0e0;">${formatCurrency((item.price || 0) * (item.quantity || 1))}</td>
+                      <td style="padding: 15px; border: 1px solid #e0e0e0; font-size: 14px;">${index + 1}</td>
+                      <td style="padding: 15px; border: 1px solid #e0e0e0; font-size: 14px;">${item.description || item.name}</td>
+                      <td style="padding: 15px; text-align: center; border: 1px solid #e0e0e0; font-size: 14px;">${item.quantity || 1}</td>
+                      <td style="padding: 15px; text-align: right; border: 1px solid #e0e0e0; font-size: 14px;">${formatCurrency(item.price || 0)}</td>
+                      <td style="padding: 15px; text-align: right; border: 1px solid #e0e0e0; font-size: 14px;">${formatCurrency((item.price || 0) * (item.quantity || 1))}</td>
                     </tr>
                   `).join('') : `
                     <tr>
-                      <td style="padding: 12px; border: 1px solid #e0e0e0;">1</td>
-                      <td style="padding: 12px; border: 1px solid #e0e0e0;">${invoice.title || 'Barang/Jasa'}</td>
-                      <td style="padding: 12px; text-align: center; border: 1px solid #e0e0e0;">1</td>
-                      <td style="padding: 12px; text-align: right; border: 1px solid #e0e0e0;">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
-                      <td style="padding: 12px; text-align: right; border: 1px solid #e0e0e0;">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
+                      <td style="padding: 15px; border: 1px solid #e0e0e0; font-size: 14px;">1</td>
+                      <td style="padding: 15px; border: 1px solid #e0e0e0; font-size: 14px;">${invoice.title || 'INVOICE BARANG/JASA'}</td>
+                      <td style="padding: 15px; text-align: center; border: 1px solid #e0e0e0; font-size: 14px;">1</td>
+                      <td style="padding: 15px; text-align: right; border: 1px solid #e0e0e0; font-size: 14px;">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
+                      <td style="padding: 15px; text-align: right; border: 1px solid #e0e0e0; font-size: 14px;">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
                     </tr>
                   `}
                 </tbody>
@@ -289,30 +289,30 @@ function InvoiceManagement({ quotations }) {
             <!-- Summary -->
             <div style="display: flex; justify-content: flex-end;">
               <div style="width: 300px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                  <span>Subtotal:</span>
-                  <span>${formatCurrency(invoice.subtotal || invoice.total || invoice.totalAmount || 0)}</span>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
+                  <span style="color: #666;">Subtotal:</span>
+                  <span style="color: #333;">${formatCurrency(invoice.subtotal || invoice.total || invoice.totalAmount || 0)}</span>
                 </div>
                 ${invoice.discount_rate && invoice.discount_rate > 0 ? `
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span>Diskon (${invoice.discount_rate}%):</span>
-                    <span>-${formatCurrency((invoice.subtotal || invoice.total || invoice.totalAmount || 0) * (invoice.discount_rate / 100))}</span>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
+                    <span style="color: #666;">Diskon (${invoice.discount_rate}%):</span>
+                    <span style="color: #333;">-${formatCurrency((invoice.subtotal || invoice.total || invoice.totalAmount || 0) * (invoice.discount_rate / 100))}</span>
                   </div>
                 ` : ''}
                 ${invoice.tax_rate && invoice.tax_rate > 0 ? `
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span>PPN (${invoice.tax_rate}%):</span>
-                    <span>${formatCurrency((invoice.subtotal || invoice.total || invoice.totalAmount || 0) * (invoice.tax_rate / 100))}</span>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
+                    <span style="color: #666;">PPN (${invoice.tax_rate}%):</span>
+                    <span style="color: #333;">${formatCurrency((invoice.subtotal || invoice.total || invoice.totalAmount || 0) * (invoice.tax_rate / 100))}</span>
                   </div>
                 ` : ''}
                 ${invoice.down_payment && invoice.down_payment > 0 ? `
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span>DP (Down Payment):</span>
-                    <span>-${formatCurrency(invoice.down_payment)}</span>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
+                    <span style="color: #666;">DP (Down Payment):</span>
+                    <span style="color: #333;">-${formatCurrency(invoice.down_payment)}</span>
                   </div>
                 ` : ''}
-                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; border-top: 2px solid #e0e0e0; padding-top: 10px;">
-                  <span>TOTAL:</span>
+                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; border-top: 2px solid #e0e0e0; padding-top: 15px; margin-top: 15px;">
+                  <span style="color: #333;">TOTAL:</span>
                   <span style="color: #ff4757;">${formatCurrency((invoice.total || invoice.totalAmount || 0) - (invoice.down_payment || 0))}</span>
                 </div>
               </div>
@@ -320,9 +320,9 @@ function InvoiceManagement({ quotations }) {
             
             <!-- Notes -->
             ${invoice.notes ? `
-              <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                <h4 style="margin: 0 0 10px 0; color: #4ecdc4;">Catatan:</h4>
-                <p style="margin: 0; color: #666; line-height: 1.6;">${invoice.notes}</p>
+              <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                <h4 style="margin: 0 0 10px 0; color: #4ecdc4; font-size: 16px;">Catatan:</h4>
+                <p style="margin: 0; color: #666; line-height: 1.6; font-size: 14px;">${invoice.notes}</p>
               </div>
             ` : ''}
           </div>
@@ -784,15 +784,18 @@ function InvoiceManagement({ quotations }) {
                 boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
                 width: '800px',
                 maxWidth: '90vw',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                fontFamily: 'Arial, sans-serif',
+                color: '#333'
               }}>
                 {/* Header */}
                 <div style={{
-                  padding: '30px',
+                  padding: '40px',
                   borderBottom: '2px solid #f0f0f0',
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'flex-start'
+                  alignItems: 'flex-start',
+                  marginBottom: '30px'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <div style={{ display: 'flex', gap: '3px' }}>
@@ -807,21 +810,15 @@ function InvoiceManagement({ quotations }) {
                     </div>
                   </div>
                   <div style={{
-                    background: 'white',
-                    color: '#333',
-                    padding: '20px',
-                    borderRadius: '10px',
-                    textAlign: 'center',
-                    minWidth: '200px',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                    textAlign: 'right'
                   }}>
-                    <h1 style={{ margin: '0 0 10px 0', fontSize: '28px', fontWeight: '800', textTransform: 'uppercase' }}>INVOICE</h1>
-                    <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', fontWeight: '600' }}>Detail Invoice</h3>
-                    <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                    <h1 style={{ margin: '0 0 10px 0', fontSize: '32px', fontWeight: '800', color: '#333', textTransform: 'uppercase' }}>INVOICE</h1>
+                    <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: '600', color: '#333' }}>Detail Invoice</h3>
+                    <div style={{ fontSize: '12px', lineHeight: '1.6', color: '#666' }}>
                       <p style={{ margin: '5px 0' }}><strong>No. Invoice:</strong> {previewInvoice.invoice_number || previewInvoice.invoiceNumber}</p>
                       <p style={{ margin: '5px 0' }}><strong>Tanggal:</strong> {new Date(previewInvoice.date || previewInvoice.invoiceDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                       <p style={{ margin: '5px 0' }}><strong>Status:</strong> {previewInvoice.status}</p>
-                      <div style={{ fontSize: '18px', fontWeight: '700', marginTop: '10px', color: '#ff4757' }}>
+                      <div style={{ fontSize: '18px', fontWeight: '700', marginTop: '15px', color: '#ff4757' }}>
                         Total: {formatCurrency(previewInvoice.total || previewInvoice.totalAmount || 0)}
                       </div>
                     </div>
@@ -829,87 +826,82 @@ function InvoiceManagement({ quotations }) {
                 </div>
                 
                 {/* Content */}
-                <div style={{ padding: '30px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '30px' }}>
+                <div style={{ padding: '0 40px 40px 40px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '40px' }}>
                     <div>
                       <h3 style={{ color: '#4ecdc4', margin: '0 0 15px 0', fontSize: '18px', fontWeight: '600' }}>Tagihan Kepada</h3>
                       <div style={{ fontSize: '18px', fontWeight: '700', color: '#333', margin: '10px 0' }}>{previewInvoice.customer}</div>
-                      <p style={{ margin: '8px 0', color: '#333', fontSize: '14px' }}>Pelanggan</p>
-                      <p style={{ margin: '8px 0', color: '#333', fontSize: '14px' }}>Telepon: +62 21 1234 5678</p>
-                      <p style={{ margin: '8px 0', color: '#333', fontSize: '14px' }}>Email: customer@example.com</p>
+                      <div style={{ color: '#666', lineHeight: '1.6', fontSize: '14px' }}>
+                        <p style={{ margin: '5px 0' }}>Alamat: {previewInvoice.customer_address || 'N/A'}</p>
+                        <p style={{ margin: '5px 0' }}>Email: {previewInvoice.customer_email || 'N/A'}</p>
+                        <p style={{ margin: '5px 0' }}>Telp: {previewInvoice.customer_phone || 'N/A'}</p>
+                      </div>
                     </div>
                     <div>
-                      <h3 style={{ color: '#4ecdc4', margin: '0 0 15px 0', fontSize: '18px', fontWeight: '600' }}>Proyek</h3>
-                      <p style={{ margin: '8px 0', color: '#333', fontSize: '14px' }}>Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.</p>
-                      <div style={{ height: '1px', background: '#f0f0f0', margin: '20px 0' }}></div>
-                      <p style={{ margin: '8px 0', color: '#333', fontSize: '14px' }}><strong>ID Klien:</strong> CL-{Math.floor(Math.random() * 1000000)}</p>
-                      <p style={{ margin: '8px 0', color: '#333', fontSize: '14px' }}><strong>No. Akun:</strong> ACC-{Math.floor(Math.random() * 1000000)}</p>
+                      <h3 style={{ color: '#4ecdc4', margin: '0 0 15px 0', fontSize: '18px', fontWeight: '600' }}>Informasi Pembayaran</h3>
+                      <div style={{ color: '#666', lineHeight: '1.6', fontSize: '14px' }}>
+                        <p style={{ margin: '5px 0' }}><strong>Metode:</strong> {previewInvoice.payment_method || 'Transfer Bank'}</p>
+                        <p style={{ margin: '5px 0' }}><strong>Rekening:</strong> {previewInvoice.bank_account || 'N/A'}</p>
+                        <p style={{ margin: '5px 0' }}><strong>Jatuh Tempo:</strong> {previewInvoice.due_date ? new Date(previewInvoice.due_date).toLocaleDateString('id-ID') : 'N/A'}</p>
+                        <p style={{ margin: '5px 0' }}><strong>Terms:</strong> {previewInvoice.payment_terms || 'Net 30'}</p>
+                      </div>
                     </div>
                   </div>
                   
                   {/* Items Table */}
-                  <table style={{ width: '100%', borderCollapse: 'collapse', margin: '30px 0' }}>
-                    <thead>
-                      <tr style={{ background: '#f8f9fa' }}>
-                        <th style={{ padding: '15px', textAlign: 'left', fontWeight: '600', color: '#333', borderBottom: '2px solid #e9ecef' }}>NO</th>
-                        <th style={{ padding: '15px', textAlign: 'left', fontWeight: '600', color: '#333', borderBottom: '2px solid #e9ecef' }}>DESKRIPSI ITEM</th>
-                        <th style={{ padding: '15px', textAlign: 'center', fontWeight: '600', color: '#333', borderBottom: '2px solid #e9ecef' }}>QTY</th>
-                        <th style={{ padding: '15px', textAlign: 'right', fontWeight: '600', color: '#333', borderBottom: '2px solid #e9ecef' }}>HARGA</th>
-                        <th style={{ padding: '15px', textAlign: 'right', fontWeight: '600', color: '#333', borderBottom: '2px solid #e9ecef' }}>JUMLAH</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td style={{ padding: '15px', borderBottom: '1px solid #f0f0f0', color: '#333' }}>1</td>
-                        <td style={{ padding: '15px', borderBottom: '1px solid #f0f0f0', color: '#333' }}>
-                          <div style={{ fontWeight: '600', color: '#333' }}>Layanan Profesional</div>
-                          <div style={{ color: '#666', fontSize: '12px', marginTop: '5px' }}>Solusi bisnis komprehensif dan layanan konsultasi yang disediakan sesuai dengan persyaratan proyek.</div>
-                        </td>
-                        <td style={{ padding: '15px', borderBottom: '1px solid #f0f0f0', color: '#333', textAlign: 'center' }}>1</td>
-                        <td style={{ padding: '15px', borderBottom: '1px solid #f0f0f0', color: '#333', textAlign: 'right' }}>
-                          {formatCurrency(previewInvoice.total || previewInvoice.totalAmount || 0)}
-                        </td>
-                        <td style={{ padding: '15px', borderBottom: '1px solid #f0f0f0', color: '#333', textAlign: 'right', fontWeight: '700' }}>
-                          {formatCurrency(previewInvoice.total || previewInvoice.totalAmount || 0)}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div style={{ marginBottom: '40px' }}>
+                    <h3 style={{ color: '#4ecdc4', margin: '0 0 20px 0', fontSize: '18px', fontWeight: '600' }}>Detail Barang/Jasa</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #e0e0e0', background: 'white' }}>
+                      <thead>
+                        <tr style={{ background: '#f8f9fa' }}>
+                          <th style={{ padding: '15px', textAlign: 'left', border: '1px solid #e0e0e0', fontWeight: '600', fontSize: '14px', color: '#333' }}>No</th>
+                          <th style={{ padding: '15px', textAlign: 'left', border: '1px solid #e0e0e0', fontWeight: '600', fontSize: '14px', color: '#333' }}>DESKRIPSI BARANG/JASA</th>
+                          <th style={{ padding: '15px', textAlign: 'center', border: '1px solid #e0e0e0', fontWeight: '600', fontSize: '14px', color: '#333' }}>QTY</th>
+                          <th style={{ padding: '15px', textAlign: 'right', border: '1px solid #e0e0e0', fontWeight: '600', fontSize: '14px', color: '#333' }}>HARGA</th>
+                          <th style={{ padding: '15px', textAlign: 'right', border: '1px solid #e0e0e0', fontWeight: '600', fontSize: '14px', color: '#333' }}>TOTAL</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style={{ padding: '15px', border: '1px solid #e0e0e0', fontSize: '14px' }}>1</td>
+                          <td style={{ padding: '15px', border: '1px solid #e0e0e0', fontSize: '14px' }}>{previewInvoice.title || 'INVOICE BARANG/JASA'}</td>
+                          <td style={{ padding: '15px', textAlign: 'center', border: '1px solid #e0e0e0', fontSize: '14px' }}>1</td>
+                          <td style={{ padding: '15px', textAlign: 'right', border: '1px solid #e0e0e0', fontSize: '14px' }}>{formatCurrency(previewInvoice.total || previewInvoice.totalAmount || 0)}</td>
+                          <td style={{ padding: '15px', textAlign: 'right', border: '1px solid #e0e0e0', fontSize: '14px' }}>{formatCurrency(previewInvoice.total || previewInvoice.totalAmount || 0)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                   
                   {/* Summary */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginTop: '30px' }}>
-                    <div>
-                      <h3 style={{ color: '#4ecdc4', margin: '0 0 15px 0', fontSize: '18px', fontWeight: '600' }}>Metode Pembayaran</h3>
-                      <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-                        <div style={{ width: '30px', height: '20px', borderRadius: '4px', background: '#00d4aa' }}></div>
-                        <div style={{ width: '30px', height: '20px', borderRadius: '4px', background: '#ff6b35' }}></div>
-                        <div style={{ width: '30px', height: '20px', borderRadius: '4px', background: '#4ecdc4' }}></div>
-                        <div style={{ width: '30px', height: '20px', borderRadius: '4px', background: '#ff4757' }}></div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <div style={{ width: '300px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
+                        <span style={{ color: '#666' }}>Subtotal:</span>
+                        <span style={{ color: '#333' }}>{formatCurrency(previewInvoice.subtotal || previewInvoice.total || previewInvoice.totalAmount || 0)}</span>
                       </div>
-                      <p style={{ margin: '8px 0', color: '#333', fontSize: '14px' }}><strong>Transfer Bank:</strong> 1234-5678-9012-3456</p>
-                      <p style={{ margin: '8px 0', color: '#333', fontSize: '14px' }}><strong>PayPal:</strong> payment@quotationapps.com</p>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '8px 0', fontSize: '14px' }}>
-                        <span>Sub-Total:</span>
-                        <span>{formatCurrency(previewInvoice.total || previewInvoice.totalAmount || 0)}</span>
+                      {previewInvoice.discount_rate && previewInvoice.discount_rate > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
+                          <span style={{ color: '#666' }}>Diskon ({previewInvoice.discount_rate}%):</span>
+                          <span style={{ color: '#333' }}>-{formatCurrency((previewInvoice.subtotal || previewInvoice.total || previewInvoice.totalAmount || 0) * (previewInvoice.discount_rate / 100))}</span>
+                        </div>
+                      )}
+                      {previewInvoice.tax_rate && previewInvoice.tax_rate > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
+                          <span style={{ color: '#666' }}>PPN ({previewInvoice.tax_rate}%):</span>
+                          <span style={{ color: '#333' }}>{formatCurrency((previewInvoice.subtotal || previewInvoice.total || previewInvoice.totalAmount || 0) * (previewInvoice.tax_rate / 100))}</span>
+                        </div>
+                      )}
+                      {previewInvoice.down_payment && previewInvoice.down_payment > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
+                          <span style={{ color: '#666' }}>DP (Down Payment):</span>
+                          <span style={{ color: '#333' }}>-{formatCurrency(previewInvoice.down_payment)}</span>
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700', fontSize: '18px', borderTop: '2px solid #e0e0e0', paddingTop: '15px', marginTop: '15px' }}>
+                        <span style={{ color: '#333' }}>TOTAL:</span>
+                        <span style={{ color: '#ff4757' }}>{formatCurrency((previewInvoice.total || previewInvoice.totalAmount || 0) - (previewInvoice.down_payment || 0))}</span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '8px 0', fontSize: '14px' }}>
-                        <span>Pajak ({(previewInvoice.tax || 11)}%):</span>
-                        <span>{formatCurrency((previewInvoice.total || previewInvoice.totalAmount || 0) * (previewInvoice.tax || 11) / 100)}</span>
-                      </div>
-                                              <div style={{ display: 'flex', justifyContent: 'space-between', margin: '8px 0', fontSize: '14px' }}>
-                          <span>Diskon ({(previewInvoice.discount || 0)}%):</span>
-                          <span>-{formatCurrency((previewInvoice.total || previewInvoice.totalAmount || 0) * (previewInvoice.discount || 0) / 100)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', margin: '8px 0', fontSize: '14px' }}>
-                          <span>DP (Down Payment):</span>
-                          <span>-{formatCurrency(previewInvoice.down_payment || 0)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', margin: '8px 0', fontSize: '20px', fontWeight: '800', color: '#ff4757', borderTop: '2px solid #f0f0f0', paddingTop: '10px', marginTop: '10px' }}>
-                          <span>TOTAL:</span>
-                          <span>{formatCurrency((previewInvoice.total || previewInvoice.totalAmount || 0) - (previewInvoice.down_payment || 0))}</span>
-                        </div>
                     </div>
                   </div>
                 </div>
