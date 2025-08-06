@@ -1029,183 +1029,260 @@ app.get('/export/quotation/:id', (req, res) => {
             return numberToWords(Math.floor(num / 1000000)) + ' Juta' + (num % 1000000 !== 0 ? ' ' + numberToWords(num % 1000000) : '');
           };
           
-          // Header dengan desain yang tepat - EDISI BIRU
-          doc.fontSize(28)
-             .fillColor('#1976D2')  // Warna biru untuk edisi biru
-             .text('PENAWARAN', { align: 'center' })
-             .moveDown(1.5);
-        
-        // Judul Penawaran (Kiri) - dengan spacing yang konsisten
-        doc.fontSize(14)
-           .fillColor('#333')
-           .text(quotation.title || 'PENAWARAN BARANG/JASA', 40, 130);
-        
-        // Detail Penawaran (Kanan) - dengan alignment yang tepat
-        doc.fontSize(9)
-           .fillColor('#666')
-           .text('Nomor:', 450, 130)
-           .text('Tanggal:', 450, 150)
-           .text('Status:', 450, 170)
-           .fontSize(10)
-           .fillColor('#333')
-           .text(quotation.id.toString().padStart(3, '0'), 520, 130)
-           .text(new Date(quotation.date).toLocaleDateString('id-ID', { 
-             year: 'numeric', 
-             month: 'long', 
-             day: 'numeric' 
-           }), 520, 150)
-           .text(quotation.status, 520, 170);
-        
-        // Bagian Kepada (Info Klien) - dengan spacing yang lebih baik
-        doc.rect(40, 210, 260, 80)
-           .fillAndStroke('#E3F2FD', '#1976D2')  // Background biru muda, border biru
-           .fillColor('#1976D2')  // Teks biru untuk judul
-           .fontSize(11)
-           .font('Helvetica-Bold')
-           .text('KEPADA', 50, 220)
-           .fillColor('#333')
-           .fontSize(10)
-           .font('Helvetica')
-           .text(quotation.customer, 50, 235)
-           .fontSize(8)
-           .fillColor('#666')
-           .text(customer?.address || 'Alamat tidak tersedia', 50, 250)
-           .text(customer?.city || 'Kota tidak tersedia', 50, 260)
-           .text(customer?.phone ? `Telp: ${customer.phone}` : '', 50, 270)
-           .text(customer?.email ? `Email: ${customer.email}` : '', 50, 280);
-        
-        // Bagian Dari (Info Perusahaan) - dengan spacing yang lebih baik
-        doc.rect(320, 210, 260, 80)
-           .fillAndStroke('#E3F2FD', '#1976D2')  // Background biru muda, border biru
-           .fillColor('#1976D2')  // Teks biru untuk judul
-           .fontSize(11)
-           .font('Helvetica-Bold')
-           .text('DARI', 330, 220)
-           .fillColor('#333')
-           .fontSize(10)
-           .font('Helvetica')
-           .text(companySettings.company_name, 330, 235)
-           .fontSize(8)
-           .fillColor('#666')
-           .text(companySettings.company_address, 330, 250)
-           .text(companySettings.company_city, 330, 260)
-           .text(`Telepon: ${companySettings.company_phone}`, 330, 270)
-           .text(`Email: ${companySettings.company_email}`, 330, 280);
-        
-        // Header Tabel Barang - dengan spacing yang lebih baik
-        doc.rect(40, 310, 540, 25)
-           .fillAndStroke('#1976D2', '#1976D2')  // Background biru untuk edisi biru
-           .fillColor('white')
-           .fontSize(11)
-           .font('Helvetica-Bold')
-           .text('No', 50, 318)
-           .text('Deskripsi', 80, 318)
-           .text('Jumlah', 200, 318)
-           .text('Satuan', 250, 318)
-           .text('Harga', 320, 318)
-           .text('Total', 420, 318);
-        
-        // Tabel Barang - dengan spacing yang lebih baik
-        let yPosition = 335;
-        let totalAmount = 0;
-        
-        items.forEach((item, index) => {
-          const itemTotal = item.price * item.qty;
-          totalAmount += itemTotal;
+          // Background hijau seperti invoice
+          doc.rect(0, 0, 595, 842)
+             .fill('#4ecdc4');
           
-          // Background putih untuk semua baris dengan spacing yang lebih baik
-          doc.rect(40, yPosition, 540, 20)
-             .fillAndStroke('white', '#e0e0e0');
+          // Container putih dengan rounded corners
+          doc.rect(20, 20, 555, 802)
+             .fill('white');
           
-          doc.fillColor('#333')
-             .fontSize(9)
+          // Header dengan logo bars
+          let y = 40;
+          const barColors = [
+            [0, 212, 170],   // #00d4aa
+            [255, 107, 53],  // #ff6b35
+            [78, 205, 196],  // #4ecdc4
+            [69, 183, 209]   // #45b7d1
+          ];
+          
+          let x = 40;
+          barColors.forEach((color, index) => {
+            doc.rect(x + (index * 3), y, 2, 8)
+               .fill(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+          });
+          
+          // Company info
+          doc.fontSize(18)
+             .fill('#333')
+             .font('Helvetica-Bold')
+             .text(companySettings.company_name, x + 20, y + 6);
+          
+          doc.fontSize(10)
+             .fill('#666')
              .font('Helvetica')
-             .text((index + 1).toString(), 50, yPosition + 6)
-             .text(item.name, 80, yPosition + 6, { width: 110 })
-             .text(item.qty.toString(), 200, yPosition + 6)
-             .text(item.unit || 'Lot', 250, yPosition + 6)
-             .text(formatCurrency(item.price), 320, yPosition + 6)
-             .text(formatCurrency(itemTotal), 420, yPosition + 6);
+             .text(companySettings.company_address, x + 20, y + 12);
           
-          yPosition += 20;
-        });
-        
-        // Border bawah tabel
-        doc.rect(40, yPosition, 540, 1)
-           .fillAndStroke('#1976D2', '#1976D2');
-        
-        // Ringkasan Keuangan (Kiri) - dengan spacing yang lebih baik
-        const totalsY = yPosition + 30;
-        const summaryX = 40;
-        
-        const subtotal = totalAmount;
-        const discountAmount = subtotal * (quotation.discount || 0) / 100;
-        const afterDiscount = subtotal - discountAmount;
-        const taxAmount = afterDiscount * (quotation.tax || 11) / 100;
-        const grandTotal = afterDiscount + taxAmount;
-        
-        doc.fillColor('#666')
-           .fontSize(10)
-           .text('Sub Total:', summaryX, totalsY)
-           .text(`Diskon (${quotation.discount || 0}%):`, summaryX, totalsY + 18)
-           .text(`PPN (${quotation.tax || 11}%):`, summaryX, totalsY + 36)
-           .fontSize(12)
-           .fillColor('#1976D2')
-           .text('TOTAL:', summaryX, totalsY + 54);
-        
-        doc.fillColor('#333')
-           .fontSize(10)
-           .text(formatCurrency(subtotal), summaryX + 80, totalsY)
-           .text(formatCurrency(discountAmount), summaryX + 80, totalsY + 18)
-           .text(formatCurrency(taxAmount), summaryX + 80, totalsY + 36)
-           .fillColor('#1976D2')
-           .fontSize(14)
-           .font('Helvetica-Bold')
-           .text(formatCurrency(grandTotal), summaryX + 80, totalsY + 54);
-        
-        // Jumlah dalam kata-kata
-        doc.fontSize(8)
-           .fillColor('#666')
-           .text(`(${numberToWords(grandTotal)} Rupiah)`, summaryX, totalsY + 78, { width: 200 });
-        
-        // Syarat dan Ketentuan (Kanan) - dengan spacing yang lebih baik
-        doc.fillColor('#1976D2')  // Warna biru untuk edisi biru
-           .fontSize(11)
-           .font('Helvetica-Bold')
-           .text('SYARAT DAN KETENTUAN', 300, totalsY)
-           .fillColor('#333')
-           .fontSize(9)
-           .font('Helvetica')
-           .text('1. Pembayaran: Net 30 hari dari tanggal penawaran', 300, totalsY + 18, { width: 250 })
-           .text('2. Penawaran ini berlaku selama 30 hari', 300, totalsY + 32, { width: 250 })
-           .text('3. Harga dapat berubah sewaktu-waktu tanpa pemberitahuan', 300, totalsY + 46, { width: 250 })
-           .text('4. Waktu pengiriman akan dikonfirmasi setelah order diterima', 300, totalsY + 60, { width: 250 });
-        
-        // Catatan Tambahan
-        doc.fillColor('#1976D2')  // Warna biru untuk edisi biru
-           .fontSize(11)
-           .font('Helvetica-Bold')
-           .text('CATATAN TAMBAHAN', 300, totalsY + 85)
-           .fillColor('#333')
-           .fontSize(9)
-           .font('Helvetica')
-           .text('Terima kasih atas minat Anda terhadap produk/layanan kami.', 300, totalsY + 100, { width: 250 })
-           .text('Silakan hubungi kami untuk pertanyaan atau klarifikasi.', 300, totalsY + 115, { width: 250 })
-           .text(`Untuk pertanyaan, email kami di ${companySettings.company_email} atau telepon ${companySettings.company_phone}`, 300, totalsY + 130, { width: 250 });
-        
-        // Tanda Tangan
-        doc.moveTo(40, totalsY + 160)
-           .lineTo(200, totalsY + 160)
-           .stroke()
-           .fillColor('#666')
-           .fontSize(9)
-           .text('Tanda Tangan Berwenang', 40, totalsY + 170);
-        
-        doc.end();
+          // Quotation header box
+          const headerBoxWidth = 65;
+          const headerBoxX = 555 - headerBoxWidth - 20;
+          
+          doc.rect(headerBoxX, y - 5, headerBoxWidth, 40)
+             .fill('white')
+             .stroke('#e0e0e0');
+          
+          doc.fontSize(16)
+             .fill('#333')
+             .font('Helvetica-Bold')
+             .text('PENAWARAN', headerBoxX + headerBoxWidth/2, y + 2, { align: 'center' });
+          
+          doc.fontSize(10)
+             .text('Detail Penawaran', headerBoxX + headerBoxWidth/2, y + 8, { align: 'center' });
+          
+          doc.fontSize(8)
+             .fill('#666')
+             .font('Helvetica')
+             .text(`No: ${quotation.id.toString().padStart(3, '0')}`, headerBoxX + 5, y + 16);
+          doc.text(`Tanggal: ${new Date(quotation.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`, headerBoxX + 5, y + 19);
+          doc.text(`Status: ${quotation.status}`, headerBoxX + 5, y + 22);
+          
+          // Content divider
+          y += 45;
+          doc.moveTo(40, y)
+             .lineTo(555, y)
+             .stroke('#e0e0e0');
+          
+          // Content sections
+          y += 15;
+          const leftX = 40;
+          const rightX = 320;
+          
+          // Customer info
+          doc.fontSize(12)
+             .fill('#4ecdc4')
+             .font('Helvetica-Bold')
+             .text('Tagihan Kepada', leftX, y);
+          
+          y += 8;
+          doc.fontSize(12)
+             .fill('#333')
+             .font('Helvetica-Bold')
+             .text(quotation.customer, leftX, y);
+          
+          y += 6;
+          doc.font('Helvetica')
+             .fontSize(9)
+             .fill('#666')
+             .text('Pelanggan', leftX, y);
+          y += 4;
+          doc.text('Telepon: +62 21 1234 5678', leftX, y);
+          y += 4;
+          doc.text('Email: customer@example.com', leftX, y);
+          
+          // Project info
+          y -= 18;
+          doc.fill('#4ecdc4')
+             .font('Helvetica-Bold')
+             .fontSize(12)
+             .text('Proyek', rightX, y);
+          
+          y += 8;
+          doc.fill('#333')
+             .font('Helvetica')
+             .fontSize(9)
+             .text('Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.', rightX, y, { width: 200 });
+          
+          y += 8;
+          doc.moveTo(rightX, y)
+             .lineTo(rightX + 200, y)
+             .stroke('#e0e0e0');
+          y += 4;
+          
+          doc.font('Helvetica')
+             .fontSize(9)
+             .text(`ID Klien: CL-${Math.floor(Math.random() * 1000000)}`, rightX, y);
+          y += 4;
+          doc.text(`No. Akun: ACC-${Math.floor(Math.random() * 1000000)}`, rightX, y);
+          
+          // Table
+          y += 15;
+          doc.moveTo(leftX, y)
+             .lineTo(555, y)
+             .stroke('#e0e0e0');
+          
+          y += 8;
+          doc.fontSize(10)
+             .fill('#333')
+             .font('Helvetica-Bold');
+          
+          const colWidths = [12, 65, 18, 28, 28];
+          let colX = leftX;
+          
+          doc.text('NO', colX, y);
+          colX += colWidths[0];
+          doc.text('DESKRIPSI ITEM', colX, y);
+          colX += colWidths[1];
+          doc.text('QTY', colX, y);
+          colX += colWidths[2];
+          doc.text('HARGA', colX, y);
+          colX += colWidths[3];
+          doc.text('JUMLAH', colX, y);
+          
+          y += 8;
+          doc.font('Helvetica')
+             .fontSize(9);
+          
+          colX = leftX;
+          doc.text('1', colX, y);
+          colX += colWidths[0];
+          doc.font('Helvetica-Bold')
+             .text('Layanan Profesional', colX, y);
+          colX += colWidths[1];
+          doc.font('Helvetica')
+             .text('1', colX, y);
+          colX += colWidths[2];
+          doc.text(formatCurrency(quotation.total || 0), colX, y);
+          colX += colWidths[3];
+          doc.font('Helvetica-Bold')
+             .text(formatCurrency(quotation.total || 0), colX, y);
+          
+          // Summary
+          y += 20;
+          
+          doc.fontSize(10)
+             .fill('#4ecdc4')
+             .font('Helvetica-Bold')
+             .text('Metode Pembayaran', leftX, y);
+          
+          y += 6;
+          let barX = leftX;
+          barColors.forEach((color, index) => {
+            doc.rect(barX, y, 4, 3)
+               .fill(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+            barX += 5;
+          });
+          
+          y += 6;
+          doc.font('Helvetica')
+             .fontSize(8)
+             .fill('#333')
+             .text('Transfer Bank: 1234-5678-9012-3456', leftX, y);
+          y += 4;
+          doc.text('PayPal: payment@quotationapps.com', leftX, y);
+          
+          y -= 12;
+          const summaryX = rightX;
+          
+          doc.fontSize(8)
+             .fill('#333')
+             .font('Helvetica');
+          
+          const subtotal = quotation.total || 0;
+          const tax = subtotal * 0.11;
+          const discount = subtotal * 0.10;
+          const total = subtotal;
+          
+          doc.text('Sub-Total:', summaryX, y);
+          doc.text(formatCurrency(subtotal), summaryX + 45, y, { align: 'right' });
+          y += 4;
+          
+          doc.text('Pajak (11%):', summaryX, y);
+          doc.text(formatCurrency(tax), summaryX + 45, y, { align: 'right' });
+          y += 4;
+          
+          doc.text('Diskon (10%):', summaryX, y);
+          doc.text(`-${formatCurrency(discount)}`, summaryX + 45, y, { align: 'right' });
+          y += 6;
+          
+          doc.moveTo(summaryX, y)
+             .lineTo(summaryX + 55, y)
+             .stroke('#e0e0e0');
+          y += 4;
+          
+          doc.fontSize(10)
+             .fill('#ff4757')
+             .font('Helvetica-Bold')
+             .text('TOTAL:', summaryX, y);
+          doc.text(formatCurrency(total), summaryX + 45, y, { align: 'right' });
+          
+          // Footer
+          y += 15;
+          doc.rect(leftX, y, 515, 35)
+             .fill('#f8f9fa');
+          
+          doc.fontSize(10)
+             .fill('#333')
+             .font('Helvetica-Bold')
+             .text('Terima Kasih Telah Berbisnis Dengan Kami!', leftX, y + 8);
+          
+          doc.font('Helvetica')
+             .fontSize(7)
+             .fill('#666')
+             .text('Pembayaran jatuh tempo dalam 30 hari. Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan kesepakatan yang telah ditandatangani.', leftX, y + 15, { width: 250 });
+          
+          doc.fontSize(10)
+             .fill('#333')
+             .font('Helvetica-Bold')
+             .text('Tanda Tangan', rightX, y + 8);
+          
+          doc.font('Helvetica')
+             .fontSize(8)
+             .fill('#666')
+             .text(companySettings.company_name, rightX, y + 15);
+          doc.text('Manajer Akun', rightX, y + 19);
+          
+          barX = rightX + 40;
+          barColors.forEach((color, index) => {
+            doc.rect(barX + (index * 3), y + 12, 2, 8)
+               .fill(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+          });
+          
+          doc.end();
         });
       });
     });
   });
+});
 
 // Export PDF Invoice endpoint - Format persis seperti quotation
 app.get('/export/invoice/:id', (req, res) => {
