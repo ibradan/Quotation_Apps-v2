@@ -199,7 +199,7 @@ function InvoiceManagement({ quotations }) {
       
       // Generate invoice HTML content
       const invoiceHTML = `
-        <div style="background: #4ecdc4; padding: 15px; font-family: Arial, sans-serif; color: #333;">
+        <div style="background: #4ecdc4; padding: 40px; font-family: Arial, sans-serif; color: #333;">
           <div style="background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; max-width: 800px; margin: 0 auto;">
             <!-- Header -->
             <div style="padding: 20px; border-bottom: 2px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start;">
