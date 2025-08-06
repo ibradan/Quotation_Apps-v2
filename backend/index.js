@@ -1064,27 +1064,27 @@ app.get('/export/quotation/:id', (req, res) => {
              .text(companySettings.company_address, x + 20, y + 12);
           
           // Quotation header box
-          const headerBoxWidth = 65;
+          const headerBoxWidth = 80;
           const headerBoxX = 555 - headerBoxWidth - 20;
           
-          doc.rect(headerBoxX, y - 5, headerBoxWidth, 40)
+          doc.rect(headerBoxX, y - 5, headerBoxWidth, 45)
              .fill('white')
              .stroke('#e0e0e0');
           
-          doc.fontSize(16)
+          doc.fontSize(18)
              .fill('#333')
              .font('Helvetica-Bold')
-             .text('PENAWARAN', headerBoxX + headerBoxWidth/2, y + 2, { align: 'center' });
+             .text('PENAWARAN', headerBoxX + headerBoxWidth/2, y + 3, { align: 'center' });
           
           doc.fontSize(10)
-             .text('Detail Penawaran', headerBoxX + headerBoxWidth/2, y + 8, { align: 'center' });
+             .text('Detail Penawaran', headerBoxX + headerBoxWidth/2, y + 12, { align: 'center' });
           
           doc.fontSize(8)
              .fill('#666')
              .font('Helvetica')
-             .text(`No: ${quotation.id.toString().padStart(3, '0')}`, headerBoxX + 5, y + 16);
-          doc.text(`Tanggal: ${new Date(quotation.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`, headerBoxX + 5, y + 19);
-          doc.text(`Status: ${quotation.status}`, headerBoxX + 5, y + 22);
+             .text(`No: ${quotation.id.toString().padStart(3, '0')}`, headerBoxX + 5, y + 20);
+          doc.text(`Tanggal: ${new Date(quotation.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`, headerBoxX + 5, y + 24);
+          doc.text(`Status: ${quotation.status}`, headerBoxX + 5, y + 28);
           
           // Content divider
           y += 45;
@@ -1145,17 +1145,17 @@ app.get('/export/quotation/:id', (req, res) => {
           doc.text(`No. Akun: ACC-${Math.floor(Math.random() * 1000000)}`, rightX, y);
           
           // Table
-          y += 15;
+          y += 20;
           doc.moveTo(leftX, y)
              .lineTo(555, y)
              .stroke('#e0e0e0');
           
-          y += 8;
-          doc.fontSize(10)
+          y += 10;
+          doc.fontSize(11)
              .fill('#333')
              .font('Helvetica-Bold');
           
-          const colWidths = [12, 65, 18, 28, 28];
+          const colWidths = [15, 120, 25, 35, 35];
           let colX = leftX;
           
           doc.text('NO', colX, y);
@@ -1168,9 +1168,9 @@ app.get('/export/quotation/:id', (req, res) => {
           colX += colWidths[3];
           doc.text('JUMLAH', colX, y);
           
-          y += 8;
+          y += 10;
           doc.font('Helvetica')
-             .fontSize(9);
+             .fontSize(10);
           
           colX = leftX;
           doc.text('1', colX, y);
@@ -1210,10 +1210,10 @@ app.get('/export/quotation/:id', (req, res) => {
           y += 4;
           doc.text('PayPal: payment@quotationapps.com', leftX, y);
           
-          y -= 12;
+          y -= 15;
           const summaryX = rightX;
           
-          doc.fontSize(8)
+          doc.fontSize(9)
              .fill('#333')
              .font('Helvetica');
           
@@ -1223,57 +1223,57 @@ app.get('/export/quotation/:id', (req, res) => {
           const total = subtotal;
           
           doc.text('Sub-Total:', summaryX, y);
-          doc.text(formatCurrency(subtotal), summaryX + 45, y, { align: 'right' });
-          y += 4;
+          doc.text(formatCurrency(subtotal), summaryX + 50, y, { align: 'right' });
+          y += 5;
           
           doc.text('Pajak (11%):', summaryX, y);
-          doc.text(formatCurrency(tax), summaryX + 45, y, { align: 'right' });
-          y += 4;
+          doc.text(formatCurrency(tax), summaryX + 50, y, { align: 'right' });
+          y += 5;
           
           doc.text('Diskon (10%):', summaryX, y);
-          doc.text(`-${formatCurrency(discount)}`, summaryX + 45, y, { align: 'right' });
-          y += 6;
+          doc.text(`-${formatCurrency(discount)}`, summaryX + 50, y, { align: 'right' });
+          y += 8;
           
           doc.moveTo(summaryX, y)
-             .lineTo(summaryX + 55, y)
+             .lineTo(summaryX + 60, y)
              .stroke('#e0e0e0');
-          y += 4;
+          y += 5;
           
-          doc.fontSize(10)
+          doc.fontSize(11)
              .fill('#ff4757')
              .font('Helvetica-Bold')
              .text('TOTAL:', summaryX, y);
-          doc.text(formatCurrency(total), summaryX + 45, y, { align: 'right' });
+          doc.text(formatCurrency(total), summaryX + 50, y, { align: 'right' });
           
           // Footer
-          y += 15;
-          doc.rect(leftX, y, 515, 35)
+          y += 20;
+          doc.rect(leftX, y, 515, 40)
              .fill('#f8f9fa');
           
-          doc.fontSize(10)
+          doc.fontSize(11)
              .fill('#333')
              .font('Helvetica-Bold')
-             .text('Terima Kasih Telah Berbisnis Dengan Kami!', leftX, y + 8);
-          
-          doc.font('Helvetica')
-             .fontSize(7)
-             .fill('#666')
-             .text('Pembayaran jatuh tempo dalam 30 hari. Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan kesepakatan yang telah ditandatangani.', leftX, y + 15, { width: 250 });
-          
-          doc.fontSize(10)
-             .fill('#333')
-             .font('Helvetica-Bold')
-             .text('Tanda Tangan', rightX, y + 8);
+             .text('Terima Kasih Telah Berbisnis Dengan Kami!', leftX, y + 10);
           
           doc.font('Helvetica')
              .fontSize(8)
              .fill('#666')
-             .text(companySettings.company_name, rightX, y + 15);
-          doc.text('Manajer Akun', rightX, y + 19);
+             .text('Pembayaran jatuh tempo dalam 30 hari. Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan kesepakatan yang telah ditandatangani.', leftX, y + 18, { width: 250 });
           
-          barX = rightX + 40;
+          doc.fontSize(11)
+             .fill('#333')
+             .font('Helvetica-Bold')
+             .text('Tanda Tangan', rightX, y + 10);
+          
+          doc.font('Helvetica')
+             .fontSize(9)
+             .fill('#666')
+             .text(companySettings.company_name, rightX, y + 18);
+          doc.text('Manajer Akun', rightX, y + 22);
+          
+          barX = rightX + 45;
           barColors.forEach((color, index) => {
-            doc.rect(barX + (index * 3), y + 12, 2, 8)
+            doc.rect(barX + (index * 3), y + 15, 2, 8)
                .fill(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
           });
           
