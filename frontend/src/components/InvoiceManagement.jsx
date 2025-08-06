@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSettings } from '../hooks/useSettings';
 import './InvoiceManagement.css';
 
 const API_BASE_URL = 'http://localhost:3001';
@@ -44,6 +45,7 @@ const IconDownload = () => (
 );
 
 function InvoiceManagement({ quotations }) {
+  const { settings } = useSettings();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -214,12 +216,12 @@ function InvoiceManagement({ quotations }) {
       pdf.setFontSize(18);
       pdf.setTextColor(51, 51, 51);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Quotation Apps', x + 20, y + 6);
+      pdf.text(settings.company_name || 'Quotation Apps', x + 20, y + 6);
       
       pdf.setFontSize(10);
       pdf.setTextColor(102, 102, 102);
       pdf.setFont('helvetica', 'normal');
-      pdf.text('Solusi Bisnis Profesional', x + 20, y + 12);
+      pdf.text(settings.company_address || 'Solusi Bisnis Profesional', x + 20, y + 12);
       
       // Invoice header
       const headerBoxWidth = 65;
@@ -430,7 +432,7 @@ function InvoiceManagement({ quotations }) {
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(8);
       pdf.setTextColor(102, 102, 102);
-      pdf.text('Tim Quotation Apps', rightX, y + 15);
+      pdf.text(settings.company_name || 'Tim Quotation Apps', rightX, y + 15);
       pdf.text('Manajer Akun', rightX, y + 19);
       
       barX = rightX + 40;
@@ -884,8 +886,8 @@ function InvoiceManagement({ quotations }) {
                       <div style={{ width: '8px', height: '25px', borderRadius: '2px', background: '#45b7d1' }}></div>
                     </div>
                     <div>
-                      <h2 style={{ margin: '0', color: '#333', fontSize: '24px', fontWeight: '700' }}>Quotation Apps</h2>
-                      <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '14px' }}>Solusi Bisnis Profesional</p>
+                      <h2 style={{ margin: '0', color: '#333', fontSize: '24px', fontWeight: '700' }}>{settings.company_name || 'Quotation Apps'}</h2>
+                      <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '14px' }}>{settings.company_address || 'Solusi Bisnis Profesional'}</p>
                     </div>
                   </div>
                   <div style={{
@@ -995,7 +997,7 @@ function InvoiceManagement({ quotations }) {
                   </div>
                   <div style={{ textAlign: 'right', color: '#333' }}>
                     <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', fontWeight: '600', fontFamily: 'Brush Script MT, cursive' }}>Tanda Tangan</h3>
-                    <p style={{ margin: '5px 0', fontSize: '14px' }}>Tim Quotation Apps</p>
+                    <p style={{ margin: '5px 0', fontSize: '14px' }}>{settings.company_name || 'Tim Quotation Apps'}</p>
                     <p style={{ margin: '5px 0', fontSize: '14px' }}>Manajer Akun</p>
                     <div style={{ display: 'flex', gap: '3px', justifyContent: 'flex-end', marginTop: '10px' }}>
                       <div style={{ width: '6px', height: '20px', borderRadius: '2px', background: '#00d4aa' }}></div>
