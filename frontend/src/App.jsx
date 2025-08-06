@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
 import './App.css';
-import './styles/theme.css';
 import QuotationForm from './QuotationForm';
 import QuotationDetail from './QuotationDetail';
 import Dashboard from './components/Dashboard';
@@ -12,7 +11,6 @@ import CustomerManagement from './components/CustomerManagement';
 import InvoiceManagement from './components/InvoiceManagement';
 import Settings from './components/Settings';
 import { queryClient } from './lib/queryClient';
-import { ThemeProvider, ThemeToggle } from './contexts/ThemeContext';
 import { useQuotations } from './hooks/useQuotations';
 import { useItems } from './hooks/useItems';
 import { useCustomers } from './hooks/useCustomers';
@@ -95,6 +93,8 @@ function AppContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth <= 768);
   const [pageTransition, setPageTransition] = useState('entered');
   
+
+  
   // Custom hooks untuk state management
   const quotations = useQuotations();
   const items = useItems();
@@ -167,6 +167,8 @@ function AppContent() {
   const handleSidebarToggle = useCallback(() => {
     setSidebarCollapsed(prev => !prev);
   }, []);
+
+
 
   // Render halaman - memoized untuk performa
   const currentPageComponent = useMemo(() => {
@@ -266,7 +268,7 @@ function AppContent() {
         <div className="sidebar-footer">
           {!sidebarCollapsed && (
             <div className="footer-content">
-              <ThemeToggle className="theme-toggle-sidebar" />
+      
               <div className="app-version">
                 <span className="version-label">Version</span>
                 <span className="version-number">v1.0.0</span>
@@ -279,7 +281,7 @@ function AppContent() {
           )}
           {sidebarCollapsed && (
             <div className="footer-collapsed">
-              <ThemeToggle className="theme-toggle-sidebar compact" />
+      
               <div className="version-dot" title="v1.0.0"></div>
             </div>
           )}
@@ -320,17 +322,12 @@ function AppContent() {
   );
 }
 
-// App wrapper with React Query Provider and Theme Provider
+// App wrapper with React Query Provider
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AppContent />
-        {/* React Query DevTools for development */}
-        {process.env.NODE_ENV === 'development' && (
-          <ReactQueryDevtools initialIsOpen={false} />
-        )}
-      </ThemeProvider>
+      <AppContent />
+
     </QueryClientProvider>
   );
 }

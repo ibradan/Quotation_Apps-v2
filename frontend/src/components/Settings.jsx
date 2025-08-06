@@ -14,6 +14,8 @@ const Settings = ({ settings }) => {
     company_logo: ''
   });
 
+
+
   useEffect(() => {
     if (currentSettings) {
       setFormData(currentSettings);
@@ -32,6 +34,8 @@ const Settings = ({ settings }) => {
       [name]: value
     }));
   };
+
+
 
   // Database Export Function
   const handleExportDatabase = async () => {
@@ -98,13 +102,13 @@ const Settings = ({ settings }) => {
 
       const { customers, items, quotations, settings } = importData.data;
 
-      await Promise.all([
-        apiClient.post('/database/reset'),
-        ...(customers || []).map(customer => apiClient.post('/customers', customer)),
-        ...(items || []).map(item => apiClient.post('/items', item)),
-        ...(quotations || []).map(quotation => apiClient.post('/quotations', quotation)),
-        settings ? apiClient.put('/settings', settings) : Promise.resolve()
-      ]);
+      // Gunakan endpoint /database/import yang sudah ada di backend
+      await apiClient.post('/database/import', {
+        customers,
+        items,
+        quotations,
+        settings
+      });
       
       alert('✅ Database berhasil di-import! Halaman akan di-refresh.');
       window.location.reload();
@@ -296,7 +300,8 @@ const Settings = ({ settings }) => {
             </form>
           </div>
 
-          {/* Database Utilities Section */}
+
+
           <div className="settings-section">
             <div className="section-header">
               <div className="section-icon">

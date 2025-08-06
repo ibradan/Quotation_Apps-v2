@@ -72,6 +72,19 @@ const db = new sqlite3.Database('./quotation.db', (err) => {
       company_logo TEXT DEFAULT '',
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )`);
+    db.run(`CREATE TABLE IF NOT EXISTS invoices (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      customer TEXT,
+      date TEXT,
+      status TEXT DEFAULT 'draft',
+      title TEXT DEFAULT 'INVOICE BARANG/JASA',
+      invoice_number TEXT,
+      discount REAL DEFAULT 0,
+      tax REAL DEFAULT 11,
+      total REAL DEFAULT 0,
+      due_date TEXT,
+      payment_terms TEXT DEFAULT 'Net 30'
+    )`);
   }
 });
 
@@ -866,6 +879,110 @@ app.get('/history/items', (req, res) => {
     res.json(rows);
   });
 });
+
+// CRUD Invoices
+app.get('/invoices', (req, res) => {
+  db.all('SELECT * FROM invoices', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+app.post('/invoices', (req, res) => {
+  const { customer, date, status, title, invoice_number, discount, tax, total, due_date, payment_terms } = req.body;
+  
+  // Simple validation
+  if (!customer || customer.trim() === '') {
+    return res.status(400).json({ error: 'Customer harus diisi' });
+  }
+  
+  if (!date || date.trim() === '') {
+    return res.status(400).json({ error: 'Date harus diisi' });
+  }
+  
+  if (!status || status.trim() === '') {
+    return res.status(400).json({ error: 'Status harus diisi' });
+  }
+  
+  db.run('INSERT INTO invoices (customer, date, status, title, invoice_number, discount, tax, total, due_date, payment_terms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [customer, date, status, title || 'INVOICE BARANG/JASA', invoice_number, discount || 0, tax || 11, total || 0, due_date, payment_terms || 'Net 30'],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      
+      res.json({ 
+        id: this.lastID, 
+        customer, 
+        date, 
+        status,
+        title: title || 'INVOICE BARANG/JASA',
+        invoice_number,
+        discount: discount || 0,
+        tax: tax || 11,
+        total: total || 0,
+        due_date,
+        payment_terms: payment_terms || 'Net 30'
+      });
+    }
+  );
+});
+
+app.put('/invoices/:id', (req, res) => {
+  const { customer, date, status, title, invoice_number, discount, tax, total, due_date, payment_terms } = req.body;
+  
+  // Validasi input
+  if (!customer || customer.trim() === '') {
+    return res.status(400).json({ error: 'Customer harus diisi' });
+  }
+  
+  if (!date || date.trim() === '') {
+    return res.status(400).json({ error: 'Date harus diisi' });
+  }
+  
+  if (!status || status.trim() === '') {
+    return res.status(400).json({ error: 'Status harus diisi' });
+  }
+  
+  // Cek apakah invoice exists
+  db.get('SELECT * FROM invoices WHERE id=?', [req.params.id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'Invoice tidak ditemukan' });
+    
+    // Update invoice
+    db.run('UPDATE invoices SET customer=?, date=?, status=?, title=?, invoice_number=?, discount=?, tax=?, total=?, due_date=?, payment_terms=? WHERE id=?',
+      [customer, date, status, title || 'INVOICE BARANG/JASA', invoice_number, discount || 0, tax || 11, total || 0, due_date, payment_terms || 'Net 30', req.params.id],
+      function(err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        
+        res.json({ 
+          id: req.params.id, 
+          customer, 
+          date, 
+          status, 
+          title: title || 'INVOICE BARANG/JASA', 
+          invoice_number, 
+          discount: discount || 0, 
+          tax: tax || 11, 
+          total: total || 0,
+          due_date,
+          payment_terms: payment_terms || 'Net 30'
+        });
+      }
+    );
+  });
+});
+
+app.delete('/invoices/:id', (req, res) => {
+  // Cek apakah invoice exists
+  db.get('SELECT * FROM invoices WHERE id=?', [req.params.id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'Invoice tidak ditemukan' });
+    
+    db.run('DELETE FROM invoices WHERE id=?', [req.params.id], function(err2) {
+      if (err2) return res.status(500).json({ error: err2.message });
+      res.json({ success: true });
+    });
+  });
+});
 // Restore versi lama quotation
 app.post('/history/restore/quotation/:id', (req, res) => {
   db.get('SELECT * FROM history_quotations WHERE id=?', [req.params.id], (err, row) => {
@@ -896,8 +1013,7 @@ app.post('/history/restore/item/:id', (req, res) => {
 });
 
 
-// Export PDF endpoint - Fixed to use actual customer data from database
-const PDFDocument = require('pdfkit');
+// Export PDF Quotation endpoint
 app.get('/export/quotation/:id', (req, res) => {
   db.get('SELECT * FROM quotations WHERE id=?', [req.params.id], (err, quotation) => {
     if (err || !quotation) return res.status(404).json({ error: 'Quotation not found' });
@@ -926,39 +1042,39 @@ app.get('/export/quotation/:id', (req, res) => {
         };
         
         db.all('SELECT * FROM items WHERE quotation_id=?', [req.params.id], (err2, items) => {
-        if (err2) return res.status(500).json({ error: err2.message });
-        
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=quotation_${quotation.id}.pdf`);
-        
-        const doc = new PDFDocument({ margin: 40 });
-        doc.pipe(res);
-      
-        // Helper function untuk format currency
-        const formatCurrency = (amount) => {
-          return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
-        };
-        
-        // Helper function untuk format number to words
-        const numberToWords = (num) => {
-          const ones = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan'];
-          const tens = ['', '', 'Dua Puluh', 'Tiga Puluh', 'Empat Puluh', 'Lima Puluh', 'Enam Puluh', 'Tujuh Puluh', 'Delapan Puluh', 'Sembilan Puluh'];
-          const teens = ['Sepuluh', 'Sebelas', 'Dua Belas', 'Tiga Belas', 'Empat Belas', 'Lima Belas', 'Enam Belas', 'Tujuh Belas', 'Delapan Belas', 'Sembilan Belas'];
+          if (err2) return res.status(500).json({ error: err2.message });
           
-          if (num === 0) return 'Nol';
-          if (num < 10) return ones[num];
-          if (num < 20) return teens[num - 10];
-          if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
-          if (num < 1000) return ones[Math.floor(num / 100)] + ' Ratus' + (num % 100 !== 0 ? ' ' + numberToWords(num % 100) : '');
-          if (num < 1000000) return numberToWords(Math.floor(num / 1000)) + ' Ribu' + (num % 1000 !== 0 ? ' ' + numberToWords(num % 1000) : '');
-          return numberToWords(Math.floor(num / 1000000)) + ' Juta' + (num % 1000000 !== 0 ? ' ' + numberToWords(num % 1000000) : '');
-        };
+          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader('Content-Disposition', `attachment; filename=quotation_${quotation.id}.pdf`);
+          
+          const doc = new PDFDocument({ margin: 40 });
+          doc.pipe(res);
         
-        // Header dengan desain yang tepat - EDISI BIRU
-        doc.fontSize(28)
-           .fillColor('#1976D2')  // Warna biru untuk edisi biru
-           .text('PENAWARAN', { align: 'center' })
-           .moveDown(1.5);
+          // Helper function untuk format currency
+          const formatCurrency = (amount) => {
+            return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+          };
+          
+          // Helper function untuk format number to words
+          const numberToWords = (num) => {
+            const ones = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan'];
+            const tens = ['', '', 'Dua Puluh', 'Tiga Puluh', 'Empat Puluh', 'Lima Puluh', 'Enam Puluh', 'Tujuh Puluh', 'Delapan Puluh', 'Sembilan Puluh'];
+            const teens = ['Sepuluh', 'Sebelas', 'Dua Belas', 'Tiga Belas', 'Empat Belas', 'Lima Belas', 'Enam Belas', 'Tujuh Belas', 'Delapan Belas', 'Sembilan Belas'];
+            
+            if (num === 0) return 'Nol';
+            if (num < 10) return ones[num];
+            if (num < 20) return teens[num - 10];
+            if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
+            if (num < 1000) return ones[Math.floor(num / 100)] + ' Ratus' + (num % 100 !== 0 ? ' ' + numberToWords(num % 100) : '');
+            if (num < 1000000) return numberToWords(Math.floor(num / 1000)) + ' Ribu' + (num % 1000 !== 0 ? ' ' + numberToWords(num % 1000) : '');
+            return numberToWords(Math.floor(num / 1000000)) + ' Juta' + (num % 1000000 !== 0 ? ' ' + numberToWords(num % 1000000) : '');
+          };
+          
+          // Header dengan desain yang tepat - EDISI BIRU
+          doc.fontSize(28)
+             .fillColor('#1976D2')  // Warna biru untuk edisi biru
+             .text('PENAWARAN', { align: 'center' })
+             .moveDown(1.5);
         
         // Judul Penawaran (Kiri) - dengan spacing yang konsisten
         doc.fontSize(14)
@@ -1131,6 +1247,239 @@ app.get('/export/quotation/:id', (req, res) => {
       });
     });
   });
+
+// Export PDF Invoice endpoint - Format persis seperti quotation
+app.get('/export/invoice/:id', (req, res) => {
+  db.get('SELECT * FROM invoices WHERE id=?', [req.params.id], (err, invoice) => {
+    if (err || !invoice) return res.status(404).json({ error: 'Invoice not found' });
+    
+    // Get customer details from customers table
+    db.get('SELECT * FROM customers WHERE name=?', [invoice.customer], (err3, customer) => {
+      if (err3) {
+        console.error('Error fetching customer:', err3);
+        return res.status(500).json({ error: err3.message });
+      }
+      
+      // Get company settings
+      db.get('SELECT * FROM settings LIMIT 1', (err4, settings) => {
+        if (err4) {
+          console.error('Error fetching settings:', err4);
+          return res.status(500).json({ error: err4.message });
+        }
+        
+        // Use default settings if not found
+        const companySettings = settings || {
+          company_name: 'QUOTATION APPS',
+          company_address: 'Jl. Contoh No. 123',
+          company_city: 'Jakarta, Indonesia 12345',
+          company_phone: '+62 21 1234 5678',
+          company_email: 'info@quotationapps.com'
+        };
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=invoice_${invoice.id}.pdf`);
+        
+        const doc = new PDFDocument({ margin: 40 });
+        doc.pipe(res);
+      
+        // Helper function untuk format currency
+        const formatCurrency = (amount) => {
+          return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+        };
+        
+        // Helper function untuk format number to words
+        const numberToWords = (num) => {
+          const ones = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan'];
+          const tens = ['', '', 'Dua Puluh', 'Tiga Puluh', 'Empat Puluh', 'Lima Puluh', 'Enam Puluh', 'Tujuh Puluh', 'Delapan Puluh', 'Sembilan Puluh'];
+          const teens = ['Sepuluh', 'Sebelas', 'Dua Belas', 'Tiga Belas', 'Empat Belas', 'Lima Belas', 'Enam Belas', 'Tujuh Belas', 'Delapan Belas', 'Sembilan Belas'];
+          
+          if (num === 0) return 'Nol';
+          if (num < 10) return ones[num];
+          if (num < 20) return teens[num - 10];
+          if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
+          if (num < 1000) return ones[Math.floor(num / 100)] + ' Ratus' + (num % 100 !== 0 ? ' ' + numberToWords(num % 100) : '');
+          if (num < 1000000) return numberToWords(Math.floor(num / 1000)) + ' Ribu' + (num % 1000 !== 0 ? ' ' + numberToWords(num % 1000) : '');
+          return numberToWords(Math.floor(num / 1000000)) + ' Juta' + (num % 1000000 !== 0 ? ' ' + numberToWords(num % 1000000) : '');
+        };
+        
+        // Header dengan desain yang tepat - EDISI BIRU
+        doc.fontSize(28)
+           .fillColor('#1976D2')  // Warna biru untuk edisi biru
+           .text('INVOICE', { align: 'center' })
+           .moveDown(1.5);
+        
+        // Judul Invoice (Kiri) - dengan spacing yang konsisten
+        doc.fontSize(14)
+           .fillColor('#333')
+           .text(invoice.title || 'INVOICE BARANG/JASA', 40, 130);
+        
+        // Detail Invoice (Kanan) - dengan alignment yang tepat
+        doc.fontSize(9)
+           .fillColor('#666')
+           .text('Nomor:', 450, 130)
+           .text('Tanggal:', 450, 150)
+           .text('Status:', 450, 170)
+           .text('Jatuh Tempo:', 450, 190)
+           .fontSize(10)
+           .fillColor('#333')
+           .text(invoice.invoice_number || `INV-${invoice.id.toString().padStart(3, '0')}`, 520, 130)
+           .text(new Date(invoice.date).toLocaleDateString('id-ID', { 
+             year: 'numeric', 
+             month: 'long', 
+             day: 'numeric' 
+           }), 520, 150)
+           .text(invoice.status, 520, 170)
+           .text(invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('id-ID', { 
+             year: 'numeric', 
+             month: 'long', 
+             day: 'numeric' 
+           }) : '-', 520, 190);
+        
+        // Bagian Kepada (Info Klien) - dengan spacing yang lebih baik
+        doc.rect(40, 210, 260, 80)
+           .fillAndStroke('#E3F2FD', '#1976D2')  // Background biru muda, border biru
+           .fillColor('#1976D2')  // Teks biru untuk judul
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text('KEPADA', 50, 220)
+           .fillColor('#333')
+           .fontSize(10)
+           .font('Helvetica')
+           .text(invoice.customer, 50, 235)
+           .fontSize(8)
+           .fillColor('#666')
+           .text(customer?.address || 'Alamat tidak tersedia', 50, 250)
+           .text(customer?.city || 'Kota tidak tersedia', 50, 260)
+           .text(customer?.phone ? `Telp: ${customer.phone}` : '', 50, 270)
+           .text(customer?.email ? `Email: ${customer.email}` : '', 50, 280);
+        
+        // Bagian Dari (Info Perusahaan) - dengan spacing yang lebih baik
+        doc.rect(320, 210, 260, 80)
+           .fillAndStroke('#E3F2FD', '#1976D2')  // Background biru muda, border biru
+           .fillColor('#1976D2')  // Teks biru untuk judul
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text('DARI', 330, 220)
+           .fillColor('#333')
+           .fontSize(10)
+           .font('Helvetica')
+           .text(companySettings.company_name, 330, 235)
+           .fontSize(8)
+           .fillColor('#666')
+           .text(companySettings.company_address, 330, 250)
+           .text(companySettings.company_city, 330, 260)
+           .text(`Telepon: ${companySettings.company_phone}`, 330, 270)
+           .text(`Email: ${companySettings.company_email}`, 330, 280);
+        
+        // Header Tabel Barang - dengan spacing yang lebih baik
+        doc.rect(40, 310, 540, 25)
+           .fillAndStroke('#1976D2', '#1976D2')  // Background biru untuk edisi biru
+           .fillColor('white')
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text('No', 50, 318)
+           .text('Deskripsi', 80, 318)
+           .text('Jumlah', 200, 318)
+           .text('Satuan', 250, 318)
+           .text('Harga', 320, 318)
+           .text('Total', 420, 318);
+        
+        // Tabel Barang - dengan spacing yang lebih baik
+        let yPosition = 335;
+        let totalAmount = invoice.total || 0;
+        
+        // Untuk invoice, kita akan menampilkan satu baris dengan total
+        doc.rect(40, yPosition, 540, 20)
+           .fillAndStroke('white', '#e0e0e0');
+        
+        doc.fillColor('#333')
+           .fontSize(9)
+           .font('Helvetica')
+           .text('1', 50, yPosition + 6)
+           .text(invoice.title || 'INVOICE BARANG/JASA', 80, yPosition + 6, { width: 110 })
+           .text('1', 200, yPosition + 6)
+           .text('Lot', 250, yPosition + 6)
+           .text(formatCurrency(totalAmount), 320, yPosition + 6)
+           .text(formatCurrency(totalAmount), 420, yPosition + 6);
+        
+        yPosition += 20;
+        
+        // Border bawah tabel
+        doc.rect(40, yPosition, 540, 1)
+           .fillAndStroke('#1976D2', '#1976D2');
+        
+        // Ringkasan Keuangan (Kiri) - dengan spacing yang lebih baik
+        const totalsY = yPosition + 30;
+        const summaryX = 40;
+        
+        const subtotal = totalAmount;
+        const discountAmount = subtotal * (invoice.discount || 0) / 100;
+        const afterDiscount = subtotal - discountAmount;
+        const taxAmount = afterDiscount * (invoice.tax || 11) / 100;
+        const grandTotal = afterDiscount + taxAmount;
+        
+        doc.fillColor('#666')
+           .fontSize(10)
+           .text('Sub Total:', summaryX, totalsY)
+           .text(`Diskon (${invoice.discount || 0}%):`, summaryX, totalsY + 18)
+           .text(`PPN (${invoice.tax || 11}%):`, summaryX, totalsY + 36)
+           .fontSize(12)
+           .fillColor('#1976D2')
+           .text('TOTAL:', summaryX, totalsY + 54);
+        
+        doc.fillColor('#333')
+           .fontSize(10)
+           .text(formatCurrency(subtotal), summaryX + 80, totalsY)
+           .text(formatCurrency(discountAmount), summaryX + 80, totalsY + 18)
+           .text(formatCurrency(taxAmount), summaryX + 80, totalsY + 36)
+           .fillColor('#1976D2')
+           .fontSize(14)
+           .font('Helvetica-Bold')
+           .text(formatCurrency(grandTotal), summaryX + 80, totalsY + 54);
+        
+        // Jumlah dalam kata-kata
+        doc.fontSize(8)
+           .fillColor('#666')
+           .text(`(${numberToWords(grandTotal)} Rupiah)`, summaryX, totalsY + 78, { width: 200 });
+        
+        // Syarat dan Ketentuan (Kanan) - dengan spacing yang lebih baik
+        doc.fillColor('#1976D2')  // Warna biru untuk edisi biru
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text('SYARAT DAN KETENTUAN', 300, totalsY)
+           .fillColor('#333')
+           .fontSize(9)
+           .font('Helvetica')
+           .text(`1. Pembayaran: ${invoice.payment_terms || 'Net 30 hari'}`, 300, totalsY + 18, { width: 250 })
+           .text('2. Invoice ini berlaku selama 30 hari', 300, totalsY + 32, { width: 250 })
+           .text('3. Pembayaran dapat dilakukan melalui transfer bank', 300, totalsY + 46, { width: 250 })
+           .text('4. Mohon segera lakukan pembayaran sesuai jatuh tempo', 300, totalsY + 60, { width: 250 });
+        
+        // Catatan Tambahan
+        doc.fillColor('#1976D2')  // Warna biru untuk edisi biru
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text('CATATAN TAMBAHAN', 300, totalsY + 85)
+           .fillColor('#333')
+           .fontSize(9)
+           .font('Helvetica')
+           .text('Terima kasih atas kepercayaan Anda menggunakan layanan kami.', 300, totalsY + 100, { width: 250 })
+           .text('Silakan hubungi kami untuk pertanyaan atau klarifikasi.', 300, totalsY + 115, { width: 250 })
+           .text(`Untuk pertanyaan, email kami di ${companySettings.company_email} atau telepon ${companySettings.company_phone}`, 300, totalsY + 130, { width: 250 });
+        
+        // Tanda Tangan
+        doc.moveTo(40, totalsY + 160)
+           .lineTo(200, totalsY + 160)
+           .stroke()
+           .fillColor('#666')
+           .fontSize(9)
+           .text('Tanda Tangan Berwenang', 40, totalsY + 170);
+        
+        doc.end();
+      });
+    });
+  });
+});
 });
 
 // Global error handler
@@ -1155,11 +1504,12 @@ app.get('/database/export', (req, res) => {
       customers: [],
       items: [],
       quotations: [],
+      invoices: [],
       settings: {}
     };
 
     let completedQueries = 0;
-    const totalQueries = 4;
+    const totalQueries = 5;
 
     const checkComplete = () => {
       completedQueries++;
@@ -1201,6 +1551,16 @@ app.get('/database/export', (req, res) => {
       checkComplete();
     });
 
+    // Get invoices
+    db.all('SELECT * FROM invoices', [], (err, rows) => {
+      if (err) {
+        console.error('Error fetching invoices for export:', err);
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      exportData.invoices = rows;
+      checkComplete();
+    });
+
     // Get settings
     db.get('SELECT * FROM settings LIMIT 1', [], (err, row) => {
       if (err) {
@@ -1219,24 +1579,30 @@ app.get('/database/export', (req, res) => {
 
 // Import database data
 app.post('/database/import', (req, res) => {
-  const { customers, items, quotations, settings } = req.body;
+  const { customers, items, quotations, invoices, settings } = req.body;
 
   db.serialize(() => {
     db.run('BEGIN TRANSACTION');
 
     try {
       // Clear existing data
-      db.run('DELETE FROM quotation_items WHERE quotation_id IN (SELECT id FROM quotations)');
+      db.run('DELETE FROM items WHERE quotation_id IN (SELECT id FROM quotations)');
       db.run('DELETE FROM quotations');
+      db.run('DELETE FROM invoices');
       db.run('DELETE FROM items WHERE quotation_id IS NULL OR quotation_id = 0');
       db.run('DELETE FROM customers');
       db.run('DELETE FROM settings');
 
       // Import customers
       if (customers && customers.length > 0) {
-        const stmt = db.prepare('INSERT INTO customers (name, address, phone, email) VALUES (?, ?, ?, ?)');
+        const stmt = db.prepare('INSERT INTO customers (name, address, phone, email, city) VALUES (?, ?, ?, ?, ?)');
         customers.forEach(customer => {
-          stmt.run([customer.name, customer.address, customer.phone, customer.email]);
+          // Gabungkan address dan city jika ada
+          const fullAddress = customer.address || '';
+          const city = customer.city || '';
+          const combinedAddress = city ? `${fullAddress}, ${city}` : fullAddress;
+          
+          stmt.run([customer.name, combinedAddress, customer.phone, customer.email, city]);
         });
         stmt.finalize();
       }
@@ -1263,6 +1629,26 @@ app.post('/database/import', (req, res) => {
             quotation.discount || 0,
             quotation.tax || 11,
             quotation.total || 0
+          ]);
+        });
+        stmt.finalize();
+      }
+
+      // Import invoices
+      if (invoices && invoices.length > 0) {
+        const stmt = db.prepare('INSERT INTO invoices (customer, date, status, title, invoice_number, discount, tax, total, due_date, payment_terms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        invoices.forEach(invoice => {
+          stmt.run([
+            invoice.customer,
+            invoice.date,
+            invoice.status,
+            invoice.title,
+            invoice.invoice_number,
+            invoice.discount || 0,
+            invoice.tax || 11,
+            invoice.total || 0,
+            invoice.due_date,
+            invoice.payment_terms || 'Net 30'
           ]);
         });
         stmt.finalize();
@@ -1308,9 +1694,9 @@ app.post('/database/reset', (req, res) => {
 
     try {
       // Clear all data
-      db.run('DELETE FROM quotation_items');
-      db.run('DELETE FROM quotations');
       db.run('DELETE FROM items');
+      db.run('DELETE FROM quotations');
+      db.run('DELETE FROM invoices');
       db.run('DELETE FROM customers');
       db.run('DELETE FROM settings');
 

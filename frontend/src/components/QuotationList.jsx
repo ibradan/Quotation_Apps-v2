@@ -218,7 +218,7 @@ const QuotationList = ({ quotations }) => {
                     <td>
                       <div className="actions-cell">
                         <button 
-                          className="action-btn view"
+                          className="btn btn-info btn-sm"
                           onClick={() => openDetail(q)}
                           title="Lihat detail"
                         >
@@ -226,9 +226,10 @@ const QuotationList = ({ quotations }) => {
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                             <circle cx="12" cy="12" r="3"/>
                           </svg>
+                          <span>Lihat</span>
                         </button>
                         <button 
-                          className="action-btn edit"
+                          className="btn btn-success btn-sm"
                           onClick={() => openEditForm(q)}
                           title="Edit penawaran"
                         >
@@ -236,9 +237,10 @@ const QuotationList = ({ quotations }) => {
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                           </svg>
+                          <span>Edit</span>
                         </button>
                         <button 
-                          className="action-btn delete"
+                          className="btn btn-danger btn-sm"
                           onClick={() => deleteQuotation(q.id)}
                           title="Hapus penawaran"
                         >
@@ -246,10 +248,11 @@ const QuotationList = ({ quotations }) => {
                             <polyline points="3,6 5,6 21,6"/>
                             <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"/>
                           </svg>
+                          <span>Hapus</span>
                         </button>
                         {history.some(h => h.quotation_id === q.id) && (
                           <button 
-                            className="action-btn history"
+                            className="btn btn-info btn-sm"
                             onClick={() => toggleHistory(q.id)}
                             title="Lihat riwayat revisi"
                           >
@@ -257,6 +260,7 @@ const QuotationList = ({ quotations }) => {
                               <path d="M3 3v5h5"/>
                               <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
                             </svg>
+                            <span>Riwayat</span>
                           </button>
                         )}
                       </div>
@@ -276,7 +280,7 @@ const QuotationList = ({ quotations }) => {
                               Riwayat Revisi
                             </h4>
                             <button 
-                              className="action-btn"
+                              className="btn btn-secondary btn-sm"
                               onClick={() => setExpandedHistory(null)}
                               title="Tutup riwayat"
                             >
@@ -284,6 +288,7 @@ const QuotationList = ({ quotations }) => {
                                 <line x1="18" y1="6" x2="6" y2="18"/>
                                 <line x1="6" y1="6" x2="18" y2="18"/>
                               </svg>
+                              <span>Tutup</span>
                             </button>
                           </div>
                           {historyLoading ? (

@@ -129,7 +129,7 @@ DB_PATH=./quotation.db
 ### Design System
 - **Modern UI** - Clean, professional interface
 - **Responsive** - Mobile-first design
-- **Dark Mode Ready** - Prepared for theme switching
+
 - **Accessibility** - WCAG compliant components
 
 ### User Experience

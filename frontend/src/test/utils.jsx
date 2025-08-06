@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from '../contexts/ThemeContext'
+
 import { describe, it, expect, beforeEach } from 'vitest'
 
 // Test utilities
@@ -21,9 +21,7 @@ export const TestWrapper = ({ children }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        {children}
-      </ThemeProvider>
+      {children}
     </QueryClientProvider>
   )
 }
