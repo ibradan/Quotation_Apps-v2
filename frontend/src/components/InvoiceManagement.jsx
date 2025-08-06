@@ -184,199 +184,399 @@ function InvoiceManagement({ quotations }) {
 
   const handleDownloadPDF = async (invoice) => {
     try {
-      // Create a temporary hidden element for PDF generation
-      const tempDiv = document.createElement('div');
-      tempDiv.id = 'invoice-pdf-content';
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.width = '800px';
-      tempDiv.style.background = 'white';
-      tempDiv.style.padding = '20px';
-      tempDiv.style.fontFamily = 'Arial, sans-serif';
-      tempDiv.style.fontSize = '12px';
-      tempDiv.style.color = '#333';
-      
-      // Generate invoice HTML content
-      const invoiceHTML = `
-        <div style="background: #4ecdc4; padding: 40px; font-family: Arial, sans-serif; color: #333;">
-          <div style="background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; max-width: 800px; margin: 0 auto;">
-            <!-- Header -->
-            <div style="padding: 20px; border-bottom: 2px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start;">
-              <div style="display: flex; align-items: center; gap: 15px;">
-                <div style="display: flex; gap: 3px;">
-                  <div style="width: 8px; height: 25px; border-radius: 2px; background: #00d4aa;"></div>
-                  <div style="width: 8px; height: 25px; border-radius: 2px; background: #ff6b35;"></div>
-                  <div style="width: 8px; height: 25px; border-radius: 2px; background: #4ecdc4;"></div>
-                  <div style="width: 8px; height: 25px; border-radius: 2px; background: #45b7d1;"></div>
+      // Create a dedicated PDF generation service
+      const generatePDFContent = () => {
+        return `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Invoice - ${invoice.invoice_number || invoice.invoiceNumber}</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 0;
+              }
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background: #4ecdc4;
+              }
+              .invoice-container {
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                margin: 40px auto;
+                max-width: 800px;
+                overflow: hidden;
+              }
+              .header {
+                padding: 20px;
+                border-bottom: 2px solid #f0f0f0;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+              }
+              .logo-section {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+              }
+              .color-bars {
+                display: flex;
+                gap: 3px;
+              }
+              .color-bar {
+                width: 8px;
+                height: 25px;
+                border-radius: 2px;
+              }
+              .bar-green { background: #00d4aa; }
+              .bar-orange { background: #ff6b35; }
+              .bar-teal { background: #4ecdc4; }
+              .bar-blue { background: #45b7d1; }
+              .company-info h2 {
+                margin: 0;
+                color: #333;
+                font-size: 24px;
+                font-weight: 700;
+              }
+              .company-info p {
+                margin: 5px 0 0 0;
+                color: #666;
+                font-size: 14px;
+              }
+              .invoice-header {
+                background: white;
+                color: #333;
+                padding: 15px;
+                border-radius: 10px;
+                text-align: center;
+                min-width: 200px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+              }
+              .invoice-header h1 {
+                margin: 0 0 8px 0;
+                font-size: 28px;
+                font-weight: 800;
+                text-transform: uppercase;
+              }
+              .invoice-header h3 {
+                margin: 0 0 12px 0;
+                font-size: 16px;
+                font-weight: 600;
+              }
+              .invoice-details {
+                font-size: 12px;
+                line-height: 1.4;
+              }
+              .invoice-details p {
+                margin: 3px 0;
+              }
+              .total-amount {
+                font-size: 18px;
+                font-weight: 700;
+                margin-top: 8px;
+                color: #ff4757;
+              }
+              .content {
+                padding: 20px;
+              }
+              .info-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 25px;
+                margin-bottom: 20px;
+              }
+              .section-title {
+                color: #4ecdc4;
+                margin: 0 0 8px 0;
+                font-size: 18px;
+                font-weight: 600;
+              }
+              .customer-name {
+                font-size: 18px;
+                font-weight: 700;
+                color: #333;
+                margin: 6px 0;
+              }
+              .info-text {
+                margin: 4px 0;
+                color: #333;
+                font-size: 14px;
+              }
+              .divider {
+                height: 1px;
+                background: #f0f0f0;
+                margin: 12px 0;
+              }
+              .items-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 15px 0;
+              }
+              .items-table th {
+                padding: 10px;
+                text-align: left;
+                font-weight: 600;
+                color: #333;
+                border-bottom: 2px solid #e9ecef;
+                background: #f8f9fa;
+              }
+              .items-table td {
+                padding: 10px;
+                border-bottom: 1px solid #f0f0f0;
+                color: #333;
+              }
+              .items-table td.text-center { text-align: center; }
+              .items-table td.text-right { text-align: right; }
+              .items-table td.font-bold { font-weight: 700; }
+              .item-title {
+                font-weight: 600;
+                color: #333;
+              }
+              .item-description {
+                color: #666;
+                font-size: 12px;
+                margin-top: 2px;
+              }
+              .summary-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-top: 15px;
+              }
+              .payment-methods {
+                display: flex;
+                gap: 6px;
+                margin-bottom: 8px;
+              }
+              .payment-square {
+                width: 20px;
+                height: 12px;
+                border-radius: 4px;
+              }
+              .summary-row {
+                display: flex;
+                justify-content: space-between;
+                margin: 4px 0;
+                font-size: 14px;
+              }
+              .total-row {
+                display: flex;
+                justify-content: space-between;
+                margin: 4px 0;
+                font-size: 16px;
+                font-weight: 800;
+                color: #ff4757;
+                border-top: 2px solid #f0f0f0;
+                padding-top: 6px;
+                margin-top: 6px;
+              }
+              .footer {
+                padding: 15px;
+                background: #f8f9fa;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+              }
+              .footer h3 {
+                margin: 0 0 6px 0;
+                font-size: 14px;
+                font-weight: 700;
+                color: #333;
+              }
+              .footer p {
+                margin: 4px 0;
+                color: #666;
+                font-size: 10px;
+                line-height: 1.3;
+              }
+              .footer .signature-text {
+                font-size: 14px;
+              }
+              .signature-bars {
+                display: flex;
+                gap: 3px;
+                justify-content: flex-end;
+                margin-top: 8px;
+              }
+              .signature-bar {
+                width: 8px;
+                height: 25px;
+                border-radius: 2px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="invoice-container">
+              <!-- Header -->
+              <div class="header">
+                <div class="logo-section">
+                  <div class="color-bars">
+                    <div class="color-bar bar-green"></div>
+                    <div class="color-bar bar-orange"></div>
+                    <div class="color-bar bar-teal"></div>
+                    <div class="color-bar bar-blue"></div>
+                  </div>
+                  <div class="company-info">
+                    <h2>Quotation Apps</h2>
+                    <p>Solusi Bisnis Profesional</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 style="margin: 0; color: #333; font-size: 24px; font-weight: 700;">Quotation Apps</h2>
-                  <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Solusi Bisnis Profesional</p>
-                </div>
-              </div>
-              <div style="background: white; color: #333; padding: 15px; border-radius: 10px; text-align: center; min-width: 200px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 800; text-transform: uppercase;">INVOICE</h1>
-                <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">Detail Invoice</h3>
-                <div style="font-size: 12px; line-height: 1.4;">
-                  <p style="margin: 3px 0;"><strong>No. Invoice:</strong> ${invoice.invoice_number || invoice.invoiceNumber}</p>
-                  <p style="margin: 3px 0;"><strong>Tanggal:</strong> ${new Date(invoice.date || invoice.invoiceDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                  <p style="margin: 3px 0;"><strong>Status:</strong> ${invoice.status}</p>
-                  <div style="font-size: 18px; font-weight: 700; margin-top: 8px; color: #ff4757;">
-                    Total: ${formatCurrency(invoice.total || invoice.totalAmount || 0)}
+                <div class="invoice-header">
+                  <h1>INVOICE</h1>
+                  <h3>Detail Invoice</h3>
+                  <div class="invoice-details">
+                    <p><strong>No. Invoice:</strong> ${invoice.invoice_number || invoice.invoiceNumber}</p>
+                    <p><strong>Tanggal:</strong> ${new Date(invoice.date || invoice.invoiceDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                    <p><strong>Status:</strong> ${invoice.status}</p>
+                    <div class="total-amount">
+                      Total: ${formatCurrency(invoice.total || invoice.totalAmount || 0)}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <!-- Content -->
-            <div style="padding: 20px;">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 20px;">
-                <div>
-                  <h3 style="color: #4ecdc4; margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Tagihan Kepada</h3>
-                  <div style="font-size: 18px; font-weight: 700; color: #333; margin: 6px 0;">${invoice.customer}</div>
-                  <p style="margin: 4px 0; color: #333; font-size: 14px;">Pelanggan</p>
-                  <p style="margin: 4px 0; color: #333; font-size: 14px;">Telepon: +62 21 1234 5678</p>
-                  <p style="margin: 4px 0; color: #333; font-size: 14px;">Email: customer@example.com</p>
+              
+              <!-- Content -->
+              <div class="content">
+                <div class="info-grid">
+                  <div>
+                    <h3 class="section-title">Tagihan Kepada</h3>
+                    <div class="customer-name">${invoice.customer}</div>
+                    <p class="info-text">Pelanggan</p>
+                    <p class="info-text">Telepon: +62 21 1234 5678</p>
+                    <p class="info-text">Email: customer@example.com</p>
+                  </div>
+                  <div>
+                    <h3 class="section-title">Proyek</h3>
+                    <p class="info-text">Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.</p>
+                    <div class="divider"></div>
+                    <p class="info-text"><strong>ID Klien:</strong> CL-${Math.floor(Math.random() * 1000000)}</p>
+                    <p class="info-text"><strong>No. Akun:</strong> ACC-${Math.floor(Math.random() * 1000000)}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 style="color: #4ecdc4; margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Proyek</h3>
-                  <p style="margin: 4px 0; color: #333; font-size: 14px;">Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.</p>
-                  <div style="height: 1px; background: #f0f0f0; margin: 12px 0;"></div>
-                  <p style="margin: 4px 0; color: #333; font-size: 14px;"><strong>ID Klien:</strong> CL-${Math.floor(Math.random() * 1000000)}</p>
-                  <p style="margin: 4px 0; color: #333; font-size: 14px;"><strong>No. Akun:</strong> ACC-${Math.floor(Math.random() * 1000000)}</p>
+                
+                <!-- Items Table -->
+                <table class="items-table">
+                  <thead>
+                    <tr>
+                      <th>NO</th>
+                      <th>DESKRIPSI ITEM</th>
+                      <th>QTY</th>
+                      <th>HARGA</th>
+                      <th>JUMLAH</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1</td>
+                      <td>
+                        <div class="item-title">Layanan Profesional</div>
+                        <div class="item-description">Solusi bisnis komprehensif dan layanan konsultasi yang disediakan sesuai dengan persyaratan proyek.</div>
+                      </td>
+                      <td class="text-center">1</td>
+                      <td class="text-right">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
+                      <td class="text-right font-bold">${formatCurrency(invoice.total || invoice.totalAmount || 0)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <!-- Summary -->
+                <div class="summary-grid">
+                  <div>
+                    <h3 class="section-title">Metode Pembayaran</h3>
+                    <div class="payment-methods">
+                      <div class="payment-square bar-green"></div>
+                      <div class="payment-square bar-orange"></div>
+                      <div class="payment-square bar-teal"></div>
+                      <div class="payment-square" style="background: #ff4757;"></div>
+                    </div>
+                    <p class="info-text"><strong>Transfer Bank:</strong> 1234-5678-9012-3456</p>
+                    <p class="info-text"><strong>PayPal:</strong> payment@quotationapps.com</p>
+                  </div>
+                  <div style="text-align: right;">
+                    <div class="summary-row">
+                      <span>Sub-Total:</span>
+                      <span>${formatCurrency(invoice.total || invoice.totalAmount || 0)}</span>
+                    </div>
+                    <div class="summary-row">
+                      <span>Pajak (11%):</span>
+                      <span>${formatCurrency((invoice.total || invoice.totalAmount || 0) * 0.11)}</span>
+                    </div>
+                    <div class="summary-row">
+                      <span>Diskon (10%):</span>
+                      <span>-${formatCurrency((invoice.total || invoice.totalAmount || 0) * 0.10)}</span>
+                    </div>
+                    <div class="summary-row">
+                      <span>DP (Down Payment):</span>
+                      <span>-${formatCurrency(invoice.down_payment || 0)}</span>
+                    </div>
+                    <div class="total-row">
+                      <span>TOTAL:</span>
+                      <span>${formatCurrency((invoice.total || invoice.totalAmount || 0) - (invoice.down_payment || 0))}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              <!-- Items Table -->
-              <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
-                <thead>
-                  <tr style="background: #f8f9fa;">
-                    <th style="padding: 10px; text-align: left; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">NO</th>
-                    <th style="padding: 10px; text-align: left; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">DESKRIPSI ITEM</th>
-                    <th style="padding: 10px; text-align: center; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">QTY</th>
-                    <th style="padding: 10px; text-align: right; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">HARGA</th>
-                    <th style="padding: 10px; text-align: right; fontWeight: '600'; color: '#333'; borderBottom: '2px solid #e9ecef';">JUMLAH</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333';">1</td>
-                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333';">
-                      <div style="fontWeight: '600'; color: '#333';">Layanan Profesional</div>
-                      <div style="color: '#666'; fontSize: '12px'; marginTop: '2px';">Solusi bisnis komprehensif dan layanan konsultasi yang disediakan sesuai dengan persyaratan proyek.</div>
-                    </td>
-                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333'; textAlign: 'center';">1</td>
-                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333'; textAlign: 'right';">
-                      ${formatCurrency(invoice.total || invoice.totalAmount || 0)}
-                    </td>
-                    <td style="padding: 10px; borderBottom: '1px solid #f0f0f0'; color: '#333'; textAlign: 'right'; fontWeight: '700';">
-                      ${formatCurrency(invoice.total || invoice.totalAmount || 0)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              
-              <!-- Summary -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+              <!-- Footer -->
+              <div class="footer">
                 <div>
-                  <h3 style="color: #4ecdc4; margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Metode Pembayaran</h3>
-                  <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                    <div style="width: 20px; height: 12px; border-radius: 4px; background: #00d4aa;"></div>
-                    <div style="width: 20px; height: 12px; border-radius: 4px; background: #ff6b35;"></div>
-                    <div style="width: 20px; height: 12px; border-radius: 4px; background: #4ecdc4;"></div>
-                    <div style="width: 20px; height: 12px; border-radius: 4px; background: #ff4757;"></div>
-                  </div>
-                  <p style="margin: 4px 0; color: #333; font-size: 14px;"><strong>Transfer Bank:</strong> 1234-5678-9012-3456</p>
-                  <p style="margin: 4px 0; color: #333; font-size: 14px;"><strong>PayPal:</strong> payment@quotationapps.com</p>
+                  <h3>Terima Kasih Telah Berbisnis Dengan Kami!</h3>
+                  <p>
+                    Pembayaran jatuh tempo dalam 30 hari. Denda keterlambatan 2% per bulan. 
+                    Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan 
+                    kesepakatan yang telah ditandatangani.
+                  </p>
                 </div>
                 <div style="text-align: right;">
-                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px;">
-                    <span>Sub-Total:</span>
-                    <span>${formatCurrency(invoice.total || invoice.totalAmount || 0)}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px;">
-                    <span>Pajak (11%):</span>
-                    <span>${formatCurrency((invoice.total || invoice.totalAmount || 0) * 0.11)}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px;">
-                    <span>Diskon (10%):</span>
-                    <span>-${formatCurrency((invoice.total || invoice.totalAmount || 0) * 0.10)}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px;">
-                    <span>DP (Down Payment):</span>
-                    <span>-${formatCurrency(invoice.down_payment || 0)}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 16px; font-weight: 800; color: #ff4757; border-top: 2px solid #f0f0f0; padding-top: 6px; margin-top: 6px;">
-                    <span>TOTAL:</span>
-                    <span>${formatCurrency((invoice.total || invoice.totalAmount || 0) - (invoice.down_payment || 0))}</span>
+                  <h3>Tanda Tangan</h3>
+                  <p class="signature-text">Tim Quotation Apps</p>
+                  <p class="signature-text">Manajer Akun</p>
+                  <div class="signature-bars">
+                    <div class="signature-bar bar-green"></div>
+                    <div class="signature-bar bar-orange"></div>
+                    <div class="signature-bar bar-teal"></div>
+                    <div class="signature-bar bar-blue"></div>
                   </div>
                 </div>
               </div>
             </div>
-            
-            <!-- Footer -->
-            <div style="padding: 15px; background: #f8f9fa; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <div style="color: #333;">
-                <h3 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 700;">Terima Kasih Telah Berbisnis Dengan Kami!</h3>
-                <p style="margin: 4px 0; color: #666; font-size: 10px; line-height: 1.3;">
-                  Pembayaran jatuh tempo dalam 30 hari. Denda keterlambatan 2% per bulan. 
-                  Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan 
-                  kesepakatan yang telah ditandatangani.
-                </p>
-              </div>
-              <div style="text-align: right; color: #333;">
-                <h3 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 700;">Tanda Tangan</h3>
-                <p style="margin: 4px 0; color: #666; font-size: 14px;">Tim Quotation Apps</p>
-                <p style="margin: 4px 0; color: #666; font-size: 14px;">Manajer Akun</p>
-                <div style="display: flex; gap: 3px; justify-content: flex-end; margin-top: 8px;">
-                  <div style="width: 8px; height: 25px; border-radius: 2px; background: #00d4aa;"></div>
-                  <div style="width: 8px; height: 25px; border-radius: 2px; background: #ff6b35;"></div>
-                  <div style="width: 8px; height: 25px; border-radius: 2px; background: #4ecdc4;"></div>
-                  <div style="width: 8px; height: 25px; border-radius: 2px; background: #45b7d1;"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+          </body>
+          </html>
+        `;
+      };
+
+      // Create a blob URL for the HTML content
+      const htmlContent = generatePDFContent();
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+
+      // Open in new window for printing
+      const printWindow = window.open(url, '_blank');
       
-      tempDiv.innerHTML = invoiceHTML;
-      document.body.appendChild(tempDiv);
-      
-      // Generate PDF
-      const canvas = await html2canvas(tempDiv, { 
-        scale: 1.5, // Better balance between quality and size
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#4ecdc4',
-        logging: false,
-        imageTimeout: 0,
-        removeContainer: true
-      });
-      const imgData = canvas.toDataURL('image/png', 1.0); // PNG for better text clarity
-
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+          // Clean up after printing
+          setTimeout(() => {
+            URL.revokeObjectURL(url);
+            printWindow.close();
+          }, 1000);
+        };
+      } else {
+        // Fallback: download as HTML file
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice_${invoice.invoice_number || invoice.invoiceNumber}.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       }
 
-      pdf.save(`invoice_${invoice.invoice_number || invoice.invoiceNumber}.pdf`);
-      
-      // Clean up
-      document.body.removeChild(tempDiv);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF: ' + error.message);
