@@ -346,12 +346,15 @@ function InvoiceManagement({ quotations }) {
       
       // Generate PDF
       const canvas = await html2canvas(tempDiv, { 
-        scale: 1, // Reduced from 2 to 1
+        scale: 1.5, // Better balance between quality and size
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#4ecdc4'
+        backgroundColor: '#4ecdc4',
+        logging: false,
+        imageTimeout: 0,
+        removeContainer: true
       });
-      const imgData = canvas.toDataURL('image/jpeg', 0.8); // Changed from PNG to JPEG with 0.8 quality
+      const imgData = canvas.toDataURL('image/png', 1.0); // PNG for better text clarity
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgWidth = 210;
@@ -360,13 +363,13 @@ function InvoiceManagement({ quotations }) {
       let heightLeft = imgHeight;
       let position = 0;
 
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); // Changed from PNG to JPEG
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); // Changed from PNG to JPEG
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
 
