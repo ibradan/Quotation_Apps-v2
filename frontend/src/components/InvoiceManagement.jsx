@@ -227,21 +227,24 @@ function InvoiceManagement({ quotations }) {
       // Company name
       pdf.setFontSize(18);
       pdf.setTextColor(51, 51, 51);
+      pdf.setFont('helvetica', 'bold');
       pdf.text('Quotation Apps', x + 20, y + 6);
       
       pdf.setFontSize(10);
       pdf.setTextColor(102, 102, 102);
+      pdf.setFont('helvetica', 'normal');
       pdf.text('Solusi Bisnis Profesional', x + 20, y + 12);
       
       // Invoice header box
-      const headerBoxWidth = 60;
+      const headerBoxWidth = 65;
       const headerBoxX = containerX + containerWidth - headerBoxWidth - 15;
       
       pdf.setFillColor(255, 255, 255);
-      pdf.roundedRect(headerBoxX, y - 5, headerBoxWidth, 35, 2, 2, 'F');
+      pdf.roundedRect(headerBoxX, y - 5, headerBoxWidth, 40, 2, 2, 'F');
       
       pdf.setFontSize(16);
       pdf.setTextColor(51, 51, 51);
+      pdf.setFont('helvetica', 'bold');
       pdf.text('INVOICE', headerBoxX + headerBoxWidth/2, y + 2, { align: 'center' });
       
       pdf.setFontSize(10);
@@ -249,16 +252,18 @@ function InvoiceManagement({ quotations }) {
       
       pdf.setFontSize(8);
       pdf.setTextColor(102, 102, 102);
-      pdf.text(`No. Invoice: ${invoice.invoice_number || invoice.invoiceNumber}`, headerBoxX + 5, y + 15);
-      pdf.text(`Tanggal: ${new Date(invoice.date || invoice.invoiceDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`, headerBoxX + 5, y + 18);
-      pdf.text(`Status: ${invoice.status}`, headerBoxX + 5, y + 21);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`No. Invoice: ${invoice.invoice_number || invoice.invoiceNumber}`, headerBoxX + 5, y + 16);
+      pdf.text(`Tanggal: ${new Date(invoice.date || invoice.invoiceDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`, headerBoxX + 5, y + 19);
+      pdf.text(`Status: ${invoice.status}`, headerBoxX + 5, y + 22);
       
       pdf.setFontSize(12);
       pdf.setTextColor(255, 71, 87);
-      pdf.text(`Total: ${formatCurrency(invoice.total || invoice.totalAmount || 0)}`, headerBoxX + headerBoxWidth/2, y + 28, { align: 'center' });
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`Total: ${formatCurrency(invoice.total || invoice.totalAmount || 0)}`, headerBoxX + headerBoxWidth/2, y + 30, { align: 'center' });
       
       // Divider
-      y += 40;
+      y += 45;
       pdf.setDrawColor(240, 240, 240);
       pdf.line(containerX + 15, y, containerX + containerWidth - 15, y);
       
@@ -271,6 +276,7 @@ function InvoiceManagement({ quotations }) {
       
       pdf.setFontSize(12);
       pdf.setTextColor(78, 205, 196);
+      pdf.setFont('helvetica', 'bold');
       pdf.text('Tagihan Kepada', leftX, y);
       
       y += 8;
@@ -292,11 +298,13 @@ function InvoiceManagement({ quotations }) {
       y -= 18;
       pdf.setTextColor(78, 205, 196);
       pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
       pdf.text('Proyek', rightX, y);
       
       y += 8;
       pdf.setTextColor(51, 51, 51);
       pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'normal');
       pdf.text('Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.', rightX, y, { maxWidth: 70 });
       
       y += 8;
@@ -315,7 +323,7 @@ function InvoiceManagement({ quotations }) {
       pdf.setFont('helvetica', 'bold');
       
       // Table headers
-      const colWidths = [10, 60, 15, 25, 25];
+      const colWidths = [12, 65, 18, 28, 28];
       let colX = containerX + 15;
       
       pdf.text('NO', colX, y);
@@ -336,8 +344,10 @@ function InvoiceManagement({ quotations }) {
       colX = containerX + 15;
       pdf.text('1', colX, y);
       colX += colWidths[0];
+      pdf.setFont('helvetica', 'bold');
       pdf.text('Layanan Profesional', colX, y);
       colX += colWidths[1];
+      pdf.setFont('helvetica', 'normal');
       pdf.text('1', colX, y);
       colX += colWidths[2];
       pdf.text(formatCurrency(invoice.total || invoice.totalAmount || 0), colX, y);
@@ -377,6 +387,7 @@ function InvoiceManagement({ quotations }) {
       
       pdf.setFontSize(8);
       pdf.setTextColor(51, 51, 51);
+      pdf.setFont('helvetica', 'normal');
       
       const subtotal = invoice.total || invoice.totalAmount || 0;
       const tax = subtotal * 0.11;
@@ -385,36 +396,36 @@ function InvoiceManagement({ quotations }) {
       const total = subtotal - dp;
       
       pdf.text('Sub-Total:', summaryX, y);
-      pdf.text(formatCurrency(subtotal), summaryX + 40, y, { align: 'right' });
+      pdf.text(formatCurrency(subtotal), summaryX + 45, y, { align: 'right' });
       y += 4;
       
       pdf.text('Pajak (11%):', summaryX, y);
-      pdf.text(formatCurrency(tax), summaryX + 40, y, { align: 'right' });
+      pdf.text(formatCurrency(tax), summaryX + 45, y, { align: 'right' });
       y += 4;
       
       pdf.text('Diskon (10%):', summaryX, y);
-      pdf.text(`-${formatCurrency(discount)}`, summaryX + 40, y, { align: 'right' });
+      pdf.text(`-${formatCurrency(discount)}`, summaryX + 45, y, { align: 'right' });
       y += 4;
       
       pdf.text('DP (Down Payment):', summaryX, y);
-      pdf.text(`-${formatCurrency(dp)}`, summaryX + 40, y, { align: 'right' });
+      pdf.text(`-${formatCurrency(dp)}`, summaryX + 45, y, { align: 'right' });
       y += 6;
       
       // Total line
       pdf.setDrawColor(224, 224, 224);
-      pdf.line(summaryX, y, summaryX + 50, y);
+      pdf.line(summaryX, y, summaryX + 55, y);
       y += 4;
       
       pdf.setFontSize(10);
       pdf.setTextColor(255, 71, 87);
       pdf.setFont('helvetica', 'bold');
       pdf.text('TOTAL:', summaryX, y);
-      pdf.text(formatCurrency(total), summaryX + 40, y, { align: 'right' });
+      pdf.text(formatCurrency(total), summaryX + 45, y, { align: 'right' });
       
       // Footer
       y += 15;
       pdf.setFillColor(248, 249, 250);
-      pdf.rect(containerX + 15, y, containerWidth - 30, 30, 'F');
+      pdf.rect(containerX + 15, y, containerWidth - 30, 35, 'F');
       
       // Left footer
       pdf.setFontSize(10);
