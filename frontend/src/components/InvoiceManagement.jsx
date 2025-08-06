@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import './InvoiceManagement.css';
 
 const API_BASE_URL = 'http://localhost:3001';
@@ -184,38 +182,26 @@ function InvoiceManagement({ quotations }) {
 
   const handleDownloadPDF = async (invoice) => {
     try {
-      // Create a professional PDF using jsPDF with better styling
       const { jsPDF } = await import('jspdf');
       
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
-      // Set font
-      pdf.setFont('helvetica');
-      
-      // Background color for the page
-      pdf.setFillColor(78, 205, 196); // #4ecdc4
-      pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-      
-      // White invoice container
       const containerWidth = 180;
-      const containerHeight = 250;
       const containerX = (pageWidth - containerWidth) / 2;
       const containerY = 20;
       
+      // Background
+      pdf.setFillColor(78, 205, 196);
+      pdf.rect(0, 0, pageWidth, 297, 'F');
+      
+      // White container
       pdf.setFillColor(255, 255, 255);
-      pdf.roundedRect(containerX, containerY, containerWidth, containerHeight, 3, 3, 'F');
+      pdf.roundedRect(containerX, containerY, containerWidth, 250, 3, 3, 'F');
       
       // Header
       let y = containerY + 15;
-      
-      // Logo bars
       const barColors = [
-        [0, 212, 170],   // #00d4aa
-        [255, 107, 53],  // #ff6b35
-        [78, 205, 196],  // #4ecdc4
-        [69, 183, 209]   // #45b7d1
+        [0, 212, 170], [255, 107, 53], [78, 205, 196], [69, 183, 209]
       ];
       
       let x = containerX + 15;
@@ -224,7 +210,7 @@ function InvoiceManagement({ quotations }) {
         pdf.rect(x + (index * 3), y, 2, 8, 'F');
       });
       
-      // Company name
+      // Company info
       pdf.setFontSize(18);
       pdf.setTextColor(51, 51, 51);
       pdf.setFont('helvetica', 'bold');
@@ -235,7 +221,7 @@ function InvoiceManagement({ quotations }) {
       pdf.setFont('helvetica', 'normal');
       pdf.text('Solusi Bisnis Profesional', x + 20, y + 12);
       
-      // Invoice header box
+      // Invoice header
       const headerBoxWidth = 65;
       const headerBoxX = containerX + containerWidth - headerBoxWidth - 15;
       
@@ -262,18 +248,16 @@ function InvoiceManagement({ quotations }) {
       pdf.setFont('helvetica', 'bold');
       pdf.text(`Total: ${formatCurrency(invoice.total || invoice.totalAmount || 0)}`, headerBoxX + headerBoxWidth/2, y + 30, { align: 'center' });
       
-      // Divider
+      // Content
       y += 45;
       pdf.setDrawColor(240, 240, 240);
       pdf.line(containerX + 15, y, containerX + containerWidth - 15, y);
       
-      // Content sections
       y += 15;
-      
-      // Left column - Customer info
       const leftX = containerX + 15;
       const rightX = containerX + containerWidth/2 + 5;
       
+      // Customer info
       pdf.setFontSize(12);
       pdf.setTextColor(78, 205, 196);
       pdf.setFont('helvetica', 'bold');
@@ -294,7 +278,7 @@ function InvoiceManagement({ quotations }) {
       y += 4;
       pdf.text('Email: customer@example.com', leftX, y);
       
-      // Right column - Project info
+      // Project info
       y -= 18;
       pdf.setTextColor(78, 205, 196);
       pdf.setFontSize(12);
@@ -308,7 +292,6 @@ function InvoiceManagement({ quotations }) {
       pdf.text('Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.', rightX, y, { maxWidth: 70 });
       
       y += 8;
-      // Add separator line
       pdf.setDrawColor(240, 240, 240);
       pdf.line(rightX, y, rightX + 70, y);
       y += 4;
@@ -319,7 +302,7 @@ function InvoiceManagement({ quotations }) {
       y += 4;
       pdf.text(`No. Akun: ACC-${Math.floor(Math.random() * 1000000)}`, rightX, y);
       
-      // Items table
+      // Table
       y += 15;
       pdf.setDrawColor(224, 224, 224);
       pdf.line(containerX + 15, y, containerX + containerWidth - 15, y);
@@ -329,7 +312,6 @@ function InvoiceManagement({ quotations }) {
       pdf.setTextColor(51, 51, 51);
       pdf.setFont('helvetica', 'bold');
       
-      // Table headers
       const colWidths = [12, 65, 18, 28, 28];
       let colX = containerX + 15;
       
@@ -347,7 +329,6 @@ function InvoiceManagement({ quotations }) {
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
       
-      // Table row
       colX = containerX + 15;
       pdf.text('1', colX, y);
       colX += colWidths[0];
@@ -362,17 +343,15 @@ function InvoiceManagement({ quotations }) {
       pdf.setFont('helvetica', 'bold');
       pdf.text(formatCurrency(invoice.total || invoice.totalAmount || 0), colX, y);
       
-      // Summary section
+      // Summary
       y += 20;
       
-      // Left - Payment methods
       pdf.setFontSize(10);
       pdf.setTextColor(78, 205, 196);
       pdf.setFont('helvetica', 'bold');
       pdf.text('Metode Pembayaran', leftX, y);
       
       y += 6;
-      // Payment method bars
       let barX = leftX;
       barColors.forEach((color, index) => {
         pdf.setFillColor(color[0], color[1], color[2]);
@@ -388,7 +367,6 @@ function InvoiceManagement({ quotations }) {
       y += 4;
       pdf.text('PayPal: payment@quotationapps.com', leftX, y);
       
-      // Right - Financial summary
       y -= 12;
       const summaryX = rightX;
       
@@ -418,7 +396,6 @@ function InvoiceManagement({ quotations }) {
       pdf.text(`-${formatCurrency(dp)}`, summaryX + 45, y, { align: 'right' });
       y += 6;
       
-      // Total line
       pdf.setDrawColor(224, 224, 224);
       pdf.line(summaryX, y, summaryX + 55, y);
       y += 4;
@@ -434,7 +411,6 @@ function InvoiceManagement({ quotations }) {
       pdf.setFillColor(248, 249, 250);
       pdf.rect(containerX + 15, y, containerWidth - 30, 35, 'F');
       
-      // Left footer
       pdf.setFontSize(10);
       pdf.setTextColor(51, 51, 51);
       pdf.setFont('helvetica', 'bold');
@@ -446,7 +422,6 @@ function InvoiceManagement({ quotations }) {
       pdf.text('Pembayaran jatuh tempo dalam 30 hari. Denda keterlambatan 2% per bulan.', leftX, y + 15, { maxWidth: 70 });
       pdf.text('Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan kesepakatan yang telah ditandatangani.', leftX, y + 22, { maxWidth: 70 });
       
-      // Right footer
       pdf.setFontSize(10);
       pdf.setTextColor(51, 51, 51);
       pdf.setFont('helvetica', 'bold');
@@ -458,14 +433,12 @@ function InvoiceManagement({ quotations }) {
       pdf.text('Tim Quotation Apps', rightX, y + 15);
       pdf.text('Manajer Akun', rightX, y + 19);
       
-      // Signature bars
       barX = rightX + 40;
       barColors.forEach((color, index) => {
         pdf.setFillColor(color[0], color[1], color[2]);
         pdf.rect(barX + (index * 3), y + 12, 2, 8, 'F');
       });
       
-      // Save the PDF
       pdf.save(`invoice_${invoice.invoice_number || invoice.invoiceNumber}.pdf`);
       
     } catch (error) {
