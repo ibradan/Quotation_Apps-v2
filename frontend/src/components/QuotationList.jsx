@@ -64,6 +64,34 @@ const QuotationList = ({ quotations }) => {
     }
   };
 
+  const handleExportPDF = async (quotation) => {
+    try {
+      const response = await fetch(`http://localhost:3001/export/quotation/${quotation.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal export PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `quotation_${quotation.id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Gagal export PDF: ' + error.message);
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
       case 'approved': return (
@@ -229,6 +257,18 @@ const QuotationList = ({ quotations }) => {
                           <span>Lihat</span>
                         </button>
                         <button 
+                          className="btn btn-primary btn-sm"
+                          onClick={() => handleExportPDF(q)}
+                          title="Export PDF"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7,10 12,15 17,10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                          </svg>
+                          <span>PDF</span>
+                        </button>
+                        <button 
                           className="btn btn-success btn-sm"
                           onClick={() => openEditForm(q)}
                           title="Edit penawaran"
@@ -246,7 +286,7 @@ const QuotationList = ({ quotations }) => {
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="3,6 5,6 21,6"/>
-                            <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"/>
+                            <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v6"/>
                           </svg>
                           <span>Hapus</span>
                         </button>
