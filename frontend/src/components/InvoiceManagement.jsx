@@ -785,7 +785,7 @@ function InvoiceManagement({ quotations }) {
                           <div style={{ 
                 padding: '0', 
                 background: '#4ecdc4',
-                minHeight: '100vh',
+                minHeight: '80vh',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center'
