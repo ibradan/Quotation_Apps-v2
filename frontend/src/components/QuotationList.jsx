@@ -2,6 +2,8 @@ import React from 'react';
 import './QuotationList.css';
 import QuotationForm from './QuotationForm';
 import QuotationDetail from '../QuotationDetail';
+import ExportPDFMenu from './ExportPDFMenu';
+import QuotationPDFExporter from './QuotationPDFExporter';
 
 const QuotationList = ({ quotations }) => {
   const {
@@ -25,6 +27,10 @@ const QuotationList = ({ quotations }) => {
   const [detailOpen, setDetailOpen] = React.useState(false);
   const [detailData, setDetailData] = React.useState(null);
   const [expandedHistory, setExpandedHistory] = React.useState(null);
+  const [exportPDFOpen, setExportPDFOpen] = React.useState(false);
+  const [exportPDFData, setExportPDFData] = React.useState(null);
+  
+  const { generateQuotationPDF } = QuotationPDFExporter();
 
   const openEditForm = (quotation) => {
     setEditData(quotation);
@@ -65,27 +71,14 @@ const QuotationList = ({ quotations }) => {
   };
 
   const handleExportPDF = async (quotation) => {
+    setExportPDFData(quotation);
+    setExportPDFOpen(true);
+  };
+
+  const handleQuickExportPDF = async (quotation) => {
     try {
-      const response = await fetch(`http://localhost:3001/export/quotation/${quotation.id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/pdf',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Gagal export PDF');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `quotation_${quotation.id}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      const pdf = await generateQuotationPDF(quotation, {});
+      pdf.save(`quotation_${quotation.quotation_number || quotation.id}.pdf`);
     } catch (error) {
       console.error('Error exporting PDF:', error);
       alert('Gagal export PDF: ' + error.message);
@@ -256,18 +249,29 @@ const QuotationList = ({ quotations }) => {
                           </svg>
                           <span>Lihat</span>
                         </button>
-                        <button 
-                          className="btn btn-primary btn-sm"
-                          onClick={() => handleExportPDF(q)}
-                          title="Export PDF"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="7,10 12,15 17,10"/>
-                            <line x1="12" y1="15" x2="12" y2="3"/>
-                          </svg>
-                          <span>PDF</span>
-                        </button>
+                        <div className="btn-group">
+                          <button 
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleQuickExportPDF(q)}
+                            title="Quick Export PDF"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                              <polyline points="7,10 12,15 17,10"/>
+                              <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            <span>PDF</span>
+                          </button>
+                          <button 
+                            className="btn btn-primary btn-sm dropdown-toggle"
+                            onClick={() => handleExportPDF(q)}
+                            title="PDF Options"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="6,9 12,15 18,9"/>
+                            </svg>
+                          </button>
+                        </div>
                         <button 
                           className="btn btn-success btn-sm"
                           onClick={() => openEditForm(q)}
@@ -416,6 +420,16 @@ const QuotationList = ({ quotations }) => {
           onClose={() => {
             setDetailOpen(false);
             setDetailData(null);
+          }}
+        />
+      )}
+
+      {exportPDFOpen && exportPDFData && (
+        <ExportPDFMenu
+          quotation={exportPDFData}
+          onClose={() => {
+            setExportPDFOpen(false);
+            setExportPDFData(null);
           }}
         />
       )}

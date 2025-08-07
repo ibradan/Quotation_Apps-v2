@@ -971,14 +971,13 @@ app.post('/history/restore/item/:id', (req, res) => {
   });
 });
 
-
-// Export PDF Quotation endpoint - Desain persis seperti invoice
-app.get('/export/quotation/:id', (req, res) => {
-  db.get('SELECT * FROM quotations WHERE id=?', [req.params.id], (err, quotation) => {
-    if (err || !quotation) return res.status(404).json({ error: 'Quotation not found' });
+// Export PDF Invoice endpoint - SUPER PROFESSIONAL DESIGN
+app.get('/export/invoice/:id', (req, res) => {
+  db.get('SELECT * FROM invoices WHERE id=?', [req.params.id], (err, invoice) => {
+    if (err || !invoice) return res.status(404).json({ error: 'Invoice not found' });
     
-    // Get customer details from customers table
-    db.get('SELECT * FROM customers WHERE name=?', [quotation.customer], (err3, customer) => {
+    // Get customer details from customers table  
+    db.get('SELECT * FROM customers WHERE name=?', [invoice.customer], (err3, customer) => {
       if (err3) {
         console.error('Error fetching customer:', err3);
         return res.status(500).json({ error: err3.message });
@@ -1000,324 +999,294 @@ app.get('/export/quotation/:id', (req, res) => {
           company_email: 'info@quotationapps.com'
         };
         
-        db.all('SELECT * FROM items WHERE quotation_id=?', [req.params.id], (err2, items) => {
+        db.all('SELECT * FROM invoice_items WHERE invoice_id=?', [req.params.id], (err2, items) => {
           if (err2) return res.status(500).json({ error: err2.message });
           
           res.setHeader('Content-Type', 'application/pdf');
-          res.setHeader('Content-Disposition', `attachment; filename=quotation_${quotation.id}.pdf`);
+          res.setHeader('Content-Disposition', `attachment; filename=invoice_${invoice.invoice_number || invoice.id}.pdf`);
           
-          const doc = new PDFDocument({ margin: 20 });
+          const doc = new PDFDocument({ 
+            margin: 0,
+            size: 'A4',
+            bufferPages: true
+          });
           doc.pipe(res);
         
           // Helper function untuk format currency
           const formatCurrency = (amount) => {
-            return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+            return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
           };
           
-          // Background putih dengan border teal seperti invoice
-          doc.rect(0, 0, 595, 842)
-             .fill('white');
+          // Page dimensions
+          const pageWidth = 595.28;
+          const pageHeight = 841.89;
           
-          // Border teal di kiri dan kanan seperti invoice
-          doc.rect(0, 0, 15, 842)
-             .fill('#4ecdc4');
-          doc.rect(580, 0, 15, 842)
-             .fill('#4ecdc4');
+          // Modern Professional Design - RED THEME FOR INVOICE
           
-          // Header section - Layout persis seperti invoice
-          let y = 40;
-          const leftX = 60;
-          const rightX = 320;
+          // 1. HEADER SECTION - Elegant gradient background
+          doc.rect(0, 0, pageWidth, 200)
+             .fillAndStroke('#dc2626', '#b91c1c');
           
-          // Left side - Logo bars dan company info
-          const barColors = [
-            [78, 205, 196],   // teal
-            [255, 107, 53],   // orange  
-            [220, 53, 69]     // red
-          ];
-          
-          let barX = leftX;
-          barColors.forEach((color, index) => {
-            doc.rect(barX + (index * 4), y, 3, 12)
-               .fill(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
-          });
+          // Company logo area (left side)
+          doc.rect(40, 40, 4, 40).fill('#fbbf24');
+          doc.rect(48, 40, 4, 40).fill('#f59e0b');
+          doc.rect(56, 40, 4, 40).fill('#d97706');
           
           // Company info
-          doc.fontSize(20)
-             .fill('#333333')
+          doc.fontSize(28)
+             .fill('#ffffff')
              .font('Helvetica-Bold')
-             .text(companySettings.company_name, leftX + 20, y + 2);
+             .text(companySettings.company_name, 80, 50);
           
           doc.fontSize(12)
-             .fill('#666666')
+             .fill('#fecaca')
              .font('Helvetica')
-             .text(companySettings.company_address, leftX + 20, y + 25);
+             .text(companySettings.company_address, 80, 85)
+             .text(companySettings.company_city, 80, 100)
+             .text(`${companySettings.company_phone} • ${companySettings.company_email}`, 80, 115);
           
-          // Right side - Quotation header
-          doc.fontSize(28)
-             .fill('#333333')
+          // INVOICE title (right side)
+          doc.fontSize(36)
+             .fill('#ffffff')
              .font('Helvetica-Bold')
-             .text('QUOTATION', rightX, y, { align: 'right' });
+             .text('INVOICE', 350, 50, { align: 'right', width: 200 });
           
           doc.fontSize(14)
-             .fill('#666666')
+             .fill('#fecaca')
              .font('Helvetica')
-             .text('Detail Quotation', rightX, y + 30, { align: 'right' });
+             .text('BILLING DOCUMENT', 350, 90, { align: 'right', width: 200 });
           
-          // Quotation details
-          y += 35;
-          doc.fontSize(12)
-             .fill('#666666')
+          // Invoice details box
+          doc.rect(350, 110, 200, 70)
+             .fillAndStroke('rgba(255,255,255,0.1)', 'rgba(255,255,255,0.3)');
+          
+          doc.fontSize(10)
+             .fill('#ffffff')
              .font('Helvetica')
-             .text(`No. Quotation: ${quotation.quotation_number || `QUO-2025-${quotation.id.toString().padStart(3, '0')}`}`, rightX, y, { align: 'right' });
+             .text(`No: ${invoice.invoice_number || `INV-${invoice.id.toString().padStart(3, '0')}`}`, 360, 125)
+             .text(`Tanggal: ${new Date(invoice.date).toLocaleDateString('id-ID')}`, 360, 140)
+             .text(`Jatuh Tempo: ${new Date(invoice.due_date).toLocaleDateString('id-ID')}`, 360, 155);
           
-          y += 15;
-          doc.text(`Tanggal: ${new Date(quotation.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`, rightX, y, { align: 'right' });
-          
-          y += 15;
-          doc.text(`Status: ${quotation.status.toUpperCase()}`, rightX, y, { align: 'right' });
-          
-          // Total amount - merah bold seperti invoice
-          y += 20;
-          const totalAmount = quotation.total || 0;
-          doc.fontSize(18)
-             .fill('#e74c3c')
+          // Total amount highlight
+          doc.fontSize(16)
+             .fill('#fbbf24')
              .font('Helvetica-Bold')
-             .text(`Total: ${formatCurrency(totalAmount)}`, rightX, y, { align: 'right' });
+             .text(`Total: ${formatCurrency(invoice.total || 0)}`, 360, 170);
           
-          // Customer and Project section
+          // 2. CUSTOMER SECTION - Clean white section
+          let y = 220;
+          
+          // Section title
+          doc.rect(40, y, 515, 40)
+             .fill('#fef2f2');
+          
+          doc.fontSize(18)
+             .fill('#991b1b')
+             .font('Helvetica-Bold')
+             .text('TAGIHAN KEPADA', 60, y + 15);
+          
           y += 60;
           
-          // Left side - Tagihan Kepada
-          doc.rect(leftX, y, 240, 25)
-             .fill('#4ecdc4');
-          
+          // Customer details in two columns
           doc.fontSize(14)
-             .fill('white')
+             .fill('#1f2937')
              .font('Helvetica-Bold')
-             .text('Tagihan Kepada', leftX + 10, y + 8);
+             .text('CUSTOMER', 60, y);
           
-          // Customer content
-          y += 30;
           doc.fontSize(16)
-             .fill('#333333')
+             .fill('#dc2626')
              .font('Helvetica-Bold')
-             .text(quotation.customer, leftX, y);
+             .text(invoice.customer, 60, y + 20);
           
-          y += 18;
-          doc.fontSize(12)
-             .fill('#666666')
+          doc.fontSize(11)
+             .fill('#6b7280')
              .font('Helvetica')
-             .text('Pelanggan', leftX, y);
+             .text(customer?.email || 'Email tidak tersedia', 60, y + 40)
+             .text(customer?.phone || 'No telepon tidak tersedia', 60, y + 55)
+             .text(customer?.address || 'Alamat tidak tersedia', 60, y + 70);
           
-          y += 15;
-          doc.text('Telepon: +62 21 1234 5678', leftX, y);
+          // Payment info (right side)
+          doc.fontSize(14)
+             .fill('#1f2937')
+             .font('Helvetica-Bold')
+             .text('DETAIL PEMBAYARAN', 320, y);
           
-          y += 15;
-          doc.text('Email: customer@example.com', leftX, y);
+          doc.fontSize(11)
+             .fill('#6b7280')
+             .font('Helvetica')
+             .text('Metode pembayaran yang dapat digunakan:', 320, y + 20)
+             .text(`Transfer Bank: 1234-5678-9012-3456`, 320, y + 35)
+             .text(`PayPal: payment@quotationapps.com`, 320, y + 50)
+             .text(`Status: ${invoice.status?.toUpperCase() || 'PENDING'}`, 320, y + 65);
           
-          // Right side - Proyek
-          y -= 63;
-          doc.rect(rightX, y, 200, 25)
-             .fill('#4ecdc4');
+          // 3. ITEMS TABLE - Professional table design
+          y += 120;
+          
+          // Table header
+          doc.rect(40, y, 515, 35)
+             .fill('#dc2626');
+          
+          doc.fontSize(12)
+             .fill('#ffffff')
+             .font('Helvetica-Bold')
+             .text('No', 55, y + 12)
+             .text('DESKRIPSI BARANG/JASA', 90, y + 12)
+             .text('QTY', 300, y + 12)
+             .text('SATUAN', 340, y + 12)
+             .text('HARGA', 400, y + 12)
+             .text('TOTAL', 480, y + 12);
+          
+          y += 35;
+          
+          // Table rows
+          let rowIndex = 1;
+          let subtotal = 0;
+          
+          if (items.length > 0) {
+            items.forEach((item, index) => {
+              const rowHeight = 30;
+              const rowColor = index % 2 === 0 ? '#ffffff' : '#fef2f2';
+              
+              doc.rect(40, y, 515, rowHeight)
+                 .fill(rowColor);
+              
+              const itemTotal = (item.price || 0) * (item.qty || 0);
+              subtotal += itemTotal;
+              
+              doc.fontSize(10)
+                 .fill('#374151')
+                 .font('Helvetica')
+                 .text(rowIndex.toString(), 55, y + 10)
+                 .text(item.name || 'Item', 90, y + 10, { width: 200 })
+                 .text((item.qty || 0).toString(), 300, y + 10)
+                 .text(item.unit || 'pcs', 340, y + 10)
+                 .text(formatCurrency(item.price || 0), 400, y + 10, { width: 70, align: 'right' })
+                 .text(formatCurrency(itemTotal), 480, y + 10, { width: 70, align: 'right' });
+              
+              y += rowHeight;
+              rowIndex++;
+            });
+          } else {
+            // Default row if no items
+            doc.rect(40, y, 515, 30)
+               .fill('#ffffff');
+            
+            doc.fontSize(10)
+               .fill('#374151')
+               .font('Helvetica')
+               .text('1', 55, y + 10)
+               .text('Layanan Profesional', 90, y + 10)
+               .text('1', 300, y + 10)
+               .text('Lot', 340, y + 10)
+               .text(formatCurrency(invoice.total || 0), 400, y + 10, { width: 70, align: 'right' })
+               .text(formatCurrency(invoice.total || 0), 480, y + 10, { width: 70, align: 'right' });
+            
+            subtotal = invoice.total || 0;
+            y += 30;
+          }
+          
+          // 4. SUMMARY SECTION - Financial breakdown
+          y += 20;
+          
+          const summaryStartY = y;
+          const summaryX = 350;
+          
+          // Calculate totals
+          const discountAmount = subtotal * (invoice.discount || 0) / 100;
+          const afterDiscount = subtotal - discountAmount;
+          const taxAmount = afterDiscount * (invoice.tax || 11) / 100;
+          const grandTotal = afterDiscount + taxAmount;
+          
+          // Summary box
+          doc.rect(summaryX, y, 200, 120)
+             .fillAndStroke('#fef2f2', '#fecaca');
           
           doc.fontSize(14)
-             .fill('white')
+             .fill('#991b1b')
              .font('Helvetica-Bold')
-             .text('Proyek', rightX + 10, y + 8);
+             .text('RINGKASAN', summaryX + 15, y + 15);
           
-          // Project content
-          y += 30;
-          doc.fontSize(12)
-             .fill('#333333')
+          y += 40;
+          
+          doc.fontSize(11)
+             .fill('#6b7280')
              .font('Helvetica')
-             .text('Layanan bisnis profesional dan solusi yang disediakan sesuai dengan kesepakatan penawaran.', rightX, y, { width: 180 });
+             .text('Subtotal:', summaryX + 15, y)
+             .text(formatCurrency(subtotal), summaryX + 150, y, { align: 'right', width: 35 });
+          
+          y += 15;
+          doc.text(`Diskon (${invoice.discount || 0}%):`, summaryX + 15, y)
+             .text(`-${formatCurrency(discountAmount)}`, summaryX + 150, y, { align: 'right', width: 35 });
+          
+          y += 15;
+          doc.text(`PPN (${invoice.tax || 11}%):`, summaryX + 15, y)
+             .text(formatCurrency(taxAmount), summaryX + 150, y, { align: 'right', width: 35 });
+          
+          // Grand total
+          y += 20;
+          doc.rect(summaryX + 10, y - 5, 180, 25)
+             .fill('#dc2626');
+          
+          doc.fontSize(12)
+             .fill('#ffffff')
+             .font('Helvetica-Bold')
+             .text('GRAND TOTAL:', summaryX + 15, y + 3)
+             .text(formatCurrency(grandTotal), summaryX + 150, y + 3, { align: 'right', width: 35 });
+          
+          // 5. PAYMENT TERMS - Professional footer
+          y = summaryStartY;
+          
+          doc.fontSize(14)
+             .fill('#991b1b')
+             .font('Helvetica-Bold')
+             .text('SYARAT PEMBAYARAN', 60, y);
           
           y += 25;
-          doc.fontSize(12)
-             .fill('#666666')
-             .text('ID Klien: CL-760045', rightX, y);
           
-          y += 15;
-          doc.text('No. Akun: ACC-244120', rightX, y);
-          
-          // Itemized table dengan header abu-abu
-          y += 60;
-          
-          // Table headers dengan background abu-abu
-          doc.rect(leftX, y - 5, 420, 25)
-             .fill('#f5f5f5');
-          
-          doc.fontSize(14)
-             .fill('#333333')
-             .font('Helvetica-Bold')
-             .text('NO', leftX + 10, y);
-          
-          doc.text('DESKRIPSI ITEM', leftX + 60, y);
-          doc.text('QTY', leftX + 250, y);
-          doc.text('HARGA', leftX + 280, y);
-          doc.text('JUMLAH', leftX + 350, y);
-          
-          y += 30;
-          
-          // Table content dengan garis bawah
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica')
-             .text('1', leftX + 10, y);
-          
-          doc.text('Layanan Profesional', leftX + 60, y);
-          doc.text('1', leftX + 250, y);
-          doc.text(`Rp ${totalAmount.toLocaleString()}`, leftX + 280, y);
-          doc.text(`Rp ${totalAmount.toLocaleString()}`, leftX + 350, y);
-          
-          // Garis bawah table
-          doc.rect(leftX, y + 15, 420, 1)
-             .fill('#e0e0e0');
-          
-          // Payment and Cost summary
-          y += 50;
-          
-          // Left side - Metode Pembayaran
-          doc.rect(leftX, y, 240, 25)
-             .fill('#4ecdc4');
-          
-          doc.fontSize(14)
-             .fill('white')
-             .font('Helvetica-Bold')
-             .text('Metode Pembayaran', leftX + 10, y + 8);
-          
-          // Right side - Ringkasan Biaya
-          doc.rect(rightX, y, 200, 25)
-             .fill('#4ecdc4');
-          
-          doc.fontSize(14)
-             .fill('white')
-             .font('Helvetica-Bold')
-             .text('Ringkasan Biaya', rightX + 10, y + 8);
-          
-          // Payment method content dengan logo bars
-          y += 30;
-          
-          // Logo bars kecil
-          let paymentBarX = leftX;
-          barColors.forEach((color, index) => {
-            doc.rect(paymentBarX + (index * 3), y, 2, 8)
-               .fill(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
-          });
-          
-          y += 15;
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica')
-             .text('Transfer Bank: 1234-5678-9012-3456', leftX, y);
-          
-          y += 12;
-          doc.text('PayPal: payment@quotationapps.com', leftX, y);
-          
-          // Cost summary content
-          y -= 27;
-          y += 30;
-          
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica')
-             .text('Sub-Total:', rightX, y);
-          
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica-Bold')
-             .text(`Rp ${totalAmount.toLocaleString()}`, rightX + 120, y, { align: 'right', width: 70 });
-          
-          y += 15;
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica')
-             .text('Pajak (11%):', rightX, y);
-          
-          const taxAmount = Math.round(totalAmount * 0.11);
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica-Bold')
-             .text(`Rp ${taxAmount.toLocaleString()}`, rightX + 120, y, { align: 'right', width: 70 });
-          
-          y += 15;
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica')
-             .text('Diskon (0%):', rightX, y);
-          
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica-Bold')
-             .text('Rp 0', rightX + 120, y, { align: 'right', width: 70 });
-          
-          y += 15;
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica')
-             .text('DP (Down Payment):', rightX, y);
-          
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica-Bold')
-             .text('Rp 0', rightX + 120, y, { align: 'right', width: 70 });
-          
-          // Final total - merah bold
-          y += 20;
-          const finalTotal = totalAmount + taxAmount;
-          doc.fontSize(16)
-             .fill('#e74c3c')
-             .font('Helvetica-Bold')
-             .text('TOTAL:', rightX, y);
-          
-          doc.fontSize(16)
-             .fill('#e74c3c')
-             .font('Helvetica-Bold')
-             .text(`Rp ${finalTotal.toLocaleString()}`, rightX + 120, y, { align: 'right', width: 70 });
-          
-          // Footer section
-          y += 70;
-          
-          // Left side - Thank you message
-          doc.fontSize(14)
-             .fill('#333333')
-             .font('Helvetica-Bold')
-             .text('Terima Kasih Telah Berbisnis Dengan Kami!', leftX, y);
-          
-          y += 20;
           doc.fontSize(10)
-             .fill('#333333')
+             .fill('#6b7280')
              .font('Helvetica')
-             .text('Pembayaran jatuh tempo dalam 30 hari. Layanan kami mencakup konsultasi, implementasi, dan dukungan teknis sesuai dengan kesepakatan yang telah ditandatangani.', leftX, y, { width: 240 });
+             .text('• Pembayaran harus dilakukan dalam 30 hari setelah tanggal invoice', 60, y)
+             .text('• Keterlambatan pembayaran akan dikenakan denda 2% per bulan', 60, y + 15)
+             .text('• Semua biaya transfer bank ditanggung oleh pihak pembayar', 60, y + 30)
+             .text('• Invoice ini sah dan tidak memerlukan tanda tangan basah', 60, y + 45)
+             .text('• Untuk konfirmasi pembayaran hubungi kontak yang tertera', 60, y + 60);
           
-          // Right side - Signature dengan logo bars
-          y -= 20;
+          // 6. SIGNATURE SECTION - Professional closing
+          y += 100;
           
-          // Logo bars di signature
-          let signatureBarX = rightX + 50;
-          barColors.forEach((color, index) => {
-            doc.rect(signatureBarX + (index * 3), y, 2, 12)
-               .fill(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
-          });
+          doc.rect(40, y, 515, 80)
+             .fill('#fef2f2');
           
-          y += 20;
-          doc.fontSize(14)
-             .fill('#333333')
+          // Thank you message
+          doc.fontSize(16)
+             .fill('#dc2626')
              .font('Helvetica-Bold')
-             .text('Tanda Tangan', rightX + 50, y);
+             .text('Terima Kasih Atas Kepercayaan Anda!', 60, y + 20);
           
-          y += 15;
-          doc.fontSize(12)
-             .fill('#333333')
-             .font('Helvetica-Bold')
-             .text('Dani Ibra', rightX + 50, y);
-          
-          y += 10;
           doc.fontSize(10)
-             .fill('#666666')
+             .fill('#6b7280')
              .font('Helvetica')
-             .text('Manajer Akun', rightX + 50, y);
+             .text('Segera lakukan pembayaran sesuai nominal dan batas waktu yang tertera.', 60, y + 40);
+          
+          // Signature area
+          doc.fontSize(12)
+             .fill('#991b1b')
+             .font('Helvetica-Bold')
+             .text('Hormat Kami,', 400, y + 20);
+          
+          doc.fontSize(10)
+             .fill('#6b7280')
+             .font('Helvetica')
+             .text(companySettings.company_name, 400, y + 50)
+             .text('Finance Manager', 400, y + 65);
+          
+          // Professional stamp/logo area
+          doc.rect(500, y + 35, 40, 25)
+             .stroke('#fecaca');
+          doc.fontSize(8)
+             .fill('#dc2626')
+             .text('PAID', 515, y + 45);
           
           // Finalize PDF
           doc.end();
@@ -1326,11 +1295,6 @@ app.get('/export/quotation/:id', (req, res) => {
     });
   });
 });
-
-// Export PDF Invoice endpoint - Format persis seperti quotation
-app.get('/export/invoice/:id', (req, res) => {
-  db.get('SELECT * FROM invoices WHERE id=?', [req.params.id], (err, invoice) => {
-    if (err || !invoice) return res.status(404).json({ error: 'Invoice not found' });
     
     // Get customer details from customers table
     db.get('SELECT * FROM customers WHERE name=?', [invoice.customer], (err3, customer) => {
@@ -1558,7 +1522,6 @@ app.get('/export/invoice/:id', (req, res) => {
       });
     });
   });
-});
 
 // Global error handler
 app.use((error, req, res, next) => {

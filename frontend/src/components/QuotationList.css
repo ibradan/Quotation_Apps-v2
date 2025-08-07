@@ -548,6 +548,46 @@
   }
 }
 
+/* Button Group Styles */
+.btn-group {
+  display: inline-flex;
+  position: relative;
+}
+
+.btn-group .btn {
+  position: relative;
+  border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.btn-group .btn:last-child {
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+.btn-group .btn:not(:first-child) {
+  border-left-width: 0;
+}
+
+.btn-group .btn:hover {
+  z-index: 1;
+}
+
+.dropdown-toggle {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.dropdown-toggle svg {
+  width: 10px !important;
+  height: 10px !important;
+}
+
 @media (max-width: 480px) {
   .table-container {
     margin: var(--space-2);

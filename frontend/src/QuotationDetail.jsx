@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from './utils/apiUtils';
+import ExportPDFMenu from './components/ExportPDFMenu';
 import './QuotationDetail.css';
 
 export default function QuotationDetail({ open, onClose, data }) {
   const [quotationItems, setQuotationItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [exportPDFOpen, setExportPDFOpen] = useState(false);
 
   useEffect(() => {
     if (open && data?.id) {
@@ -43,22 +45,7 @@ export default function QuotationDetail({ open, onClose, data }) {
   };
 
   const handleExportPDF = async () => {
-    try {
-      const response = await apiClient.get(`/export/quotation/${data.id}`, {
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `quotation_${data.id}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      console.error('Gagal export PDF:', err);
-      alert('Gagal export PDF: ' + err.message);
-    }
+    setExportPDFOpen(true);
   };
 
   if (!open || !data) return null;
@@ -169,6 +156,17 @@ export default function QuotationDetail({ open, onClose, data }) {
           </button>
         </div>
       </div>
+
+      {exportPDFOpen && (
+        <ExportPDFMenu
+          quotation={{
+            ...data,
+            items: quotationItems,
+            total: totalAmount
+          }}
+          onClose={() => setExportPDFOpen(false)}
+        />
+      )}
     </div>
   );
 } 
