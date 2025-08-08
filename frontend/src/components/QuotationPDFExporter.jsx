@@ -26,7 +26,9 @@ const SIZES = {
   containerY: 20,
   cornerRadius: 3,
   padding: 15,
-  rowGap: 6
+  rowGap: 6,
+  // Make container height dynamic so the white panel visually reaches near the bottom consistently
+  containerHeight: 297 - (20 * 2) // pageHeight - (containerY * 2)
 };
 
 // Helpers
@@ -61,6 +63,25 @@ const textRight = (pdf, text, xRight, y) => {
   pdf.text(String(text), xRight, y, { align: 'right' });
 };
 
+// Wrapped text helpers
+const drawWrappedText = (pdf, text, x, y, maxWidth, lineHeight = 4) => {
+  const lines = pdf.splitTextToSize(String(text ?? ''), maxWidth);
+  lines.forEach((line, i) => pdf.text(line, x, y + i * lineHeight));
+  return { newY: y + lines.length * lineHeight, lines };
+};
+
+const drawBulletList = (pdf, items, x, y, maxWidth, lineHeight = 4) => {
+  let cursorY = y;
+  items.forEach((t) => {
+    // Wrap text and draw bullet for each wrapped block
+    const { lines } = drawWrappedText(pdf, t, x + 5, cursorY, maxWidth, lineHeight);
+    // Bullet at first line
+    pdf.text('•', x, cursorY);
+    cursorY += Math.max(lineHeight, lines.length * lineHeight);
+  });
+  return cursorY;
+};
+
 // Compute financials, prefer items when available
 const computeTotals = (quotation, items, taxRate, discount) => {
   const subtotalFromItems = Array.isArray(items) && items.length > 0
@@ -93,7 +114,7 @@ function QuotationPDFExporter() {
 
     // White container
     pdf.setFillColor(255, 255, 255);
-    pdf.roundedRect(containerX, containerY, SIZES.containerWidth, 250, SIZES.cornerRadius, SIZES.cornerRadius, 'F');
+    pdf.roundedRect(containerX, containerY, SIZES.containerWidth, SIZES.containerHeight, SIZES.cornerRadius, SIZES.cornerRadius, 'F');
 
     // Header bars + company
     let y = containerY + 15;
@@ -126,8 +147,8 @@ function QuotationPDFExporter() {
     pdf.text(`Tanggal: ${dateStr}`, headerBoxX + 5, y + 19);
     pdf.text(`Status: ${statusStr}`, headerBoxX + 5, y + 22);
 
-    setText(pdf, 12, NAVY.text, 'bold');
-    pdf.text(`Total: ${formatCurrency(Number(quotation.total || 0))}`, headerBoxX + headerBoxWidth / 2, y + 30, { align: 'center' });
+    // Removed header total text to keep header concise and avoid clutter
+    // Previously: setText(pdf, 12, NAVY.text, 'bold'); pdf.text(`Total: ${formatCurrency(...)}`, ...)
 
     // Content divider
     y += 45;
@@ -145,13 +166,17 @@ function QuotationPDFExporter() {
     y += 8;
     setText(pdf, 12, GREY.text, 'bold');
     const customerName = quotation.customer || quotation.customer_name || 'Nama Customer';
-    pdf.text(customerName, leftX, y);
+    // Wrap customer name and advance Y accordingly
+    const wrappedName = pdf.splitTextToSize(customerName, 80);
+    wrappedName.forEach((line, i) => pdf.text(line, leftX, y + i * 4));
+    y += Math.max(6, wrappedName.length * 4);
 
-    y += 6;
     setText(pdf, 9, GREY.text);
     pdf.text('Calon Pelanggan', leftX, y); y += 4;
-    pdf.text(`Telepon: ${quotation.customer_phone || '-'}`, leftX, y); y += 4;
-    pdf.text(`Email: ${quotation.customer_email || '-'}`, leftX, y);
+    const contactLines = [];
+    if (quotation.customer_phone) contactLines.push(`Telepon: ${quotation.customer_phone}`);
+    if (quotation.customer_email) contactLines.push(`Email: ${quotation.customer_email}`);
+    contactLines.forEach((line) => { pdf.text(line, leftX, y); y += 4; });
 
     // Project info (right)
     let yRight = (y - 18); // align titles
@@ -160,21 +185,68 @@ function QuotationPDFExporter() {
 
     yRight += 8;
     setText(pdf, 9, GREY.text);
-    pdf.text('Penawaran harga untuk layanan profesional dan solusi yang akan disediakan sesuai kebutuhan klien.', rightX, yRight, { maxWidth: 70 });
+    // Wrap project description and move yRight based on lines
+    const projectDesc = 'Penawaran harga untuk layanan profesional dan solusi yang akan disediakan sesuai kebutuhan klien.';
+    const { newY: afterDescY } = drawWrappedText(pdf, projectDesc, rightX, yRight, 70, 4);
+    yRight = afterDescY;
 
-    yRight += 8;
+    yRight += 4;
     drawDivider(pdf, rightX, yRight, rightX + 70);
     yRight += 4;
 
     setText(pdf, 9, GREY.text);
     const validDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
     pdf.text(`Valid hingga: ${validDate}`, rightX, yRight); yRight += 4;
-    pdf.text(`Referensi: ${numberStr.replace('QT-', 'QT-')}`, rightX, yRight);
+    pdf.text(`Referensi: ${numberStr}`, rightX, yRight);
 
     // Items table
     let yTable = Math.max(y, yRight) + 15;
     pdf.setDrawColor(GREY.border[0], GREY.border[1], GREY.border[2]);
     drawDivider(pdf, containerX + SIZES.padding, yTable, containerX + SIZES.containerWidth - SIZES.padding);
+
+    // Page helpers: scaffold and numbering
+    const drawPageScaffold = (isContinuation = false) => {
+      // Background + container
+      pdf.setFillColor(NAVY.bg[0], NAVY.bg[1], NAVY.bg[2]);
+      pdf.rect(0, 0, pageWidth, SIZES.pageHeight, 'F');
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(containerX, containerY, SIZES.containerWidth, SIZES.containerHeight, SIZES.cornerRadius, SIZES.cornerRadius, 'F');
+      if (isContinuation) {
+        // Small continuation label near top-left inside the container
+        setText(pdf, 9, GREY.subtle, 'bold');
+        pdf.text('Lanjutan', containerX + SIZES.padding, containerY + 12);
+        // Decorative bars
+        drawColoredBars(pdf, containerX + SIZES.padding, containerY + 15, [NAVY.accent1, NAVY.accent2, NAVY.accent3, NAVY.accent4]);
+      }
+    };
+
+    const drawPageNumberFooters = () => {
+      const pageCount = pdf.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        setText(pdf, 8, GREY.subtle);
+        pdf.text(`Halaman ${i} dari ${pageCount}`, pageWidth / 2, SIZES.pageHeight - 8, { align: 'center' });
+      }
+    };
+
+    // Helper to draw a new continuation page with container and table header
+    const addContinuationPage = () => {
+      pdf.addPage();
+      drawPageScaffold(true);
+      // Start new table area
+      yTable = containerY + 20;
+      pdf.setDrawColor(GREY.border[0], GREY.border[1], GREY.border[2]);
+      drawDivider(pdf, containerX + SIZES.padding, yTable, containerX + SIZES.containerWidth - SIZES.padding);
+      yTable += 8;
+      setText(pdf, 10, GREY.text, 'bold');
+      let hx = containerX + SIZES.padding;
+      ['NO', 'DESKRIPSI ITEM', 'QTY', 'HARGA', 'JUMLAH'].forEach((h, i) => {
+        pdf.text(h, hx, yTable);
+        hx += colWidths[i];
+      });
+      yTable += 8;
+      setText(pdf, 9, GREY.text);
+    };
 
     yTable += 8;
     setText(pdf, 10, GREY.text, 'bold');
@@ -190,44 +262,64 @@ function QuotationPDFExporter() {
     setText(pdf, 9, GREY.text);
 
     const items = Array.isArray(quotation.items) ? quotation.items : [];
-    const bottomLimit = containerY + 250 - 60; // keep room for summary & footer
+    const bottomLimit = containerY + SIZES.containerHeight - 60; // keep room for summary & footer
+
+    // Precompute right edges for numeric columns
+    const startX = containerX + SIZES.padding;
+    const priceColLeft = startX + colWidths[0] + colWidths[1] + colWidths[2];
+    const amountColLeft = priceColLeft + colWidths[3];
+    const priceColRight = priceColLeft + colWidths[3] - 2;
+    const amountColRight = amountColLeft + colWidths[4] - 2;
 
     if (items.length > 0) {
       items.forEach((item, index) => {
-        if (yTable > bottomLimit) return; // simple clamp to avoid overflow
-        colX = containerX + SIZES.padding;
-        pdf.text(String(index + 1), colX, yTable);
-        colX += colWidths[0];
+        // Prepare wrapped name and row height
+        const nameText = item.name || item.description || 'Item';
+        const nameLines = pdf.splitTextToSize(nameText, 60);
+        const lineHeight = 4;
+        const rowHeight = Math.max(SIZES.rowGap, nameLines.length * lineHeight);
+        // If this row would overflow, continue on a new page first
+        if (yTable + rowHeight > bottomLimit) {
+          addContinuationPage();
+        }
+        let cx = startX;
+        pdf.text(String(index + 1), cx, yTable); cx += colWidths[0];
 
-        // Name and optional description (wrap)
+        // Name lines
         pdf.setFont('helvetica', 'bold');
-        pdf.text(item.name || item.description || 'Item', colX, yTable, { maxWidth: 60 });
+        nameLines.forEach((line, i) => pdf.text(line, cx, yTable + i * lineHeight));
         pdf.setFont('helvetica', 'normal');
 
-        colX += colWidths[1];
-        pdf.text(String(item.quantity || item.qty || 1), colX, yTable);
-        colX += colWidths[2];
-        pdf.text(formatCurrency(Number(item.price || 0)), colX, yTable);
-        colX += colWidths[3];
+        cx += colWidths[1];
+        pdf.text(String(item.quantity || item.qty || 1), cx, yTable);
+        // Price (right-aligned)
+        textRight(pdf, formatCurrency(Number(item.price || 0)), priceColRight, yTable);
+        // Amount (right-aligned, bold)
         pdf.setFont('helvetica', 'bold');
-        pdf.text(formatCurrency((Number(item.quantity || item.qty || 1) * Number(item.price || 0))), colX, yTable);
+        textRight(pdf, formatCurrency((Number(item.quantity || item.qty || 1) * Number(item.price || 0))), amountColRight, yTable);
         pdf.setFont('helvetica', 'normal');
 
-        yTable += SIZES.rowGap;
+        yTable += rowHeight;
       });
     } else {
       // Fallback single row when no items
-      colX = containerX + SIZES.padding;
-      pdf.text('1', colX, yTable); colX += colWidths[0];
-      pdf.setFont('helvetica', 'bold'); pdf.text('Layanan Profesional', colX, yTable); pdf.setFont('helvetica', 'normal');
-      colX += colWidths[1]; pdf.text('1', colX, yTable);
-      colX += colWidths[2]; pdf.text(formatCurrency(Number(quotation.total || 0)), colX, yTable);
-      colX += colWidths[3]; pdf.setFont('helvetica', 'bold'); pdf.text(formatCurrency(Number(quotation.total || 0)), colX, yTable); pdf.setFont('helvetica', 'normal');
+      let cx = startX;
+      pdf.text('1', cx, yTable); cx += colWidths[0];
+      pdf.setFont('helvetica', 'bold'); pdf.text('Layanan Profesional', cx, yTable); pdf.setFont('helvetica', 'normal');
+      cx += colWidths[1]; pdf.text('1', cx, yTable);
+      textRight(pdf, formatCurrency(Number(quotation.total || 0)), priceColRight, yTable);
+      pdf.setFont('helvetica', 'bold'); textRight(pdf, formatCurrency(Number(quotation.total || 0)), amountColRight, yTable); pdf.setFont('helvetica', 'normal');
       yTable += SIZES.rowGap;
     }
 
     // Summary & Terms
     let ySummaryTop = yTable + 15;
+
+    // If summary would overflow, move to a new page
+    if (ySummaryTop > bottomLimit) {
+      addContinuationPage();
+      ySummaryTop = containerY + 25;
+    }
 
     // Left: Syarat & Ketentuan
     setText(pdf, 12, NAVY.text, 'bold');
@@ -236,46 +328,65 @@ function QuotationPDFExporter() {
     let yBars = ySummaryTop + 6;
     drawColoredBars(pdf, leftX, yBars, [NAVY.accent1, NAVY.accent2, NAVY.accent3, NAVY.accent4], 8, 6, 8);
 
-    let yTerms = yBars + 10;
+    // Increase spacing below bars and indent bullet texts for neat layout
+    let yTerms = yBars + 12;
     setText(pdf, 8, GREY.text);
-    pdf.text('• Penawaran berlaku selama 30 hari kalender', leftX, yTerms);
-    yTerms += 4; pdf.text('• Pembayaran: 50% DP, 50% setelah selesai', leftX, yTerms);
-    yTerms += 4; pdf.text('• Harga belum termasuk pajak (PPN 11%)', leftX, yTerms);
+    const bulletX = leftX;
+    const textX = leftX + 5;
+    // Dynamic tax percent label for terms
+    const rawTaxForTerms = Number.isFinite(quotation.taxRate) ? quotation.taxRate : (Number.isFinite(settings.tax_rate) ? settings.tax_rate : 0.11);
+    const taxRateForTerms = rawTaxForTerms > 1 ? rawTaxForTerms / 100 : rawTaxForTerms;
+    const taxPercentLabel = Math.round(taxRateForTerms * 100);
+    // Use wrapped bullet list; ensure it stays within left column width
+    const termItems = [
+      'Penawaran berlaku selama 30 hari kalender',
+      'Pembayaran: 50% DP, 50% setelah selesai',
+      `Harga belum termasuk pajak (PPN ${taxPercentLabel}%)`
+    ];
+    yTerms = drawBulletList(pdf, termItems, bulletX, yTerms, 74, 4);
 
     // Right: Summary calculation
-    const taxRate = Number.isFinite(quotation.taxRate) ? quotation.taxRate : (Number.isFinite(settings.tax_rate) ? settings.tax_rate : 0.11);
+    // Normalize tax rate (supports 11 and 0.11)
+    const rawTaxRate = Number.isFinite(quotation.taxRate) ? quotation.taxRate : (Number.isFinite(settings.tax_rate) ? settings.tax_rate : 0.11);
+    const taxRate = rawTaxRate > 1 ? rawTaxRate / 100 : rawTaxRate;
     const discount = Number.isFinite(quotation.discount) && quotation.discount > 0 ? quotation.discount : 0;
     const { subtotal, tax, discount: safeDiscount, total } = computeTotals(quotation, items, taxRate, discount);
 
     const summaryX = rightX;
     let summaryY = ySummaryTop + 2; // align with left title
+    const summaryColWidth = 70; // widened to avoid overlap with labels
 
     setText(pdf, 8, GREY.text);
     pdf.text('Sub-Total:', summaryX, summaryY);
-    textRight(pdf, formatCurrency(subtotal), summaryX + 55, summaryY);
+    textRight(pdf, formatCurrency(subtotal), summaryX + summaryColWidth, summaryY);
     summaryY += 4;
 
     pdf.text(`Pajak (${Math.round(taxRate * 100)}%):`, summaryX, summaryY);
-    textRight(pdf, formatCurrency(tax), summaryX + 55, summaryY);
+    textRight(pdf, formatCurrency(tax), summaryX + summaryColWidth, summaryY);
     summaryY += 4;
 
     if (safeDiscount > 0) {
       pdf.text('Diskon:', summaryX, summaryY);
-      textRight(pdf, `-${formatCurrency(safeDiscount)}`, summaryX + 55, summaryY);
+      textRight(pdf, `-${formatCurrency(safeDiscount)}`, summaryX + summaryColWidth, summaryY);
       summaryY += 4;
     }
 
     summaryY += 2;
     pdf.setDrawColor(GREY.border[0], GREY.border[1], GREY.border[2]);
-    pdf.line(summaryX, summaryY, summaryX + 55, summaryY);
+    pdf.line(summaryX, summaryY, summaryX + summaryColWidth, summaryY);
     summaryY += 5;
 
     setText(pdf, 10, NAVY.text, 'bold');
     pdf.text('TOTAL PENAWARAN:', summaryX, summaryY);
-    textRight(pdf, formatCurrency(total), summaryX + 55, summaryY);
+    textRight(pdf, formatCurrency(total), summaryX + summaryColWidth, summaryY);
 
     // Footer (ensure spacing below the lowest section)
     y = Math.max(yTerms, summaryY) + 10;
+    // If footer overflows, push to new page bottom
+    if (y + 35 > containerY + SIZES.containerHeight - 10) {
+      addContinuationPage();
+      y = containerY + 20;
+    }
     pdf.setFillColor(GREY.panel[0], GREY.panel[1], GREY.panel[2]);
     pdf.rect(containerX + SIZES.padding, y, innerWidth, 35, 'F');
 
@@ -293,6 +404,9 @@ function QuotationPDFExporter() {
     pdf.text('Sales Manager', rightX, y + 19);
 
     drawColoredBars(pdf, rightX + 40, y + 12, [NAVY.accent1, NAVY.accent2, NAVY.accent3, NAVY.accent4], 2, 3, 8);
+
+    // Add page numbers to all pages
+    drawPageNumberFooters();
 
     return pdf;
   };

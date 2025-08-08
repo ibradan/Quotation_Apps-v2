@@ -80,18 +80,19 @@ const QuotationForm = ({ open, initialData, onSave, onClose }) => {
       
       // Apply type filter
       if (itemTypeFilter !== 'all') {
-        filtered = filtered.filter(item => item.type === itemTypeFilter);
+        filtered = filtered.filter(item => (item.type || '').toLowerCase() === itemTypeFilter);
       }
       
       // Apply search filter
       if (itemSearch) {
+        const term = itemSearch.toLowerCase();
         filtered = filtered.filter(item => 
-          item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
-          item.type.toLowerCase().includes(itemSearch.toLowerCase())
+          (item.name || '').toLowerCase().includes(term) ||
+          (item.type || '').toLowerCase().includes(term)
         );
       }
       
-      setFilteredItems(filtered.slice(0, 10));
+      setFilteredItems(filtered.slice(0, 25));
       setShowItemSuggestions(itemSearch.length > 0 && filtered.length > 0);
     }
   }, [itemSearch, itemTypeFilter, items]);
@@ -154,28 +155,60 @@ const QuotationForm = ({ open, initialData, onSave, onClose }) => {
   };
 
   const handleItemSelect = (item) => {
-    setItemSearch(item.name);
-    setSelectedItemQty(1);
+    // When picking from suggestions, add immediately with current qty
+    setItemSearch('');
     setShowItemSuggestions(false);
+    const existingIndex = selectedItems.findIndex(i => (i.id ?? i.name) === (item.id ?? item.name));
+    if (existingIndex >= 0) {
+      const updatedItems = [...selectedItems];
+      const newQty = (updatedItems[existingIndex].qty || 0) + selectedItemQty;
+      updatedItems[existingIndex] = {
+        ...updatedItems[existingIndex],
+        qty: newQty,
+        total: newQty * (item.price || 0)
+      };
+      setSelectedItems(updatedItems);
+    } else {
+      setSelectedItems(prev => [...prev, {
+        ...item,
+        qty: selectedItemQty,
+        total: (item.price || 0) * selectedItemQty
+      }]);
+    }
+    setSelectedItemQty(1);
   };
 
   const addSelectedItem = () => {
     if (!itemSearch.trim() || selectedItemQty < 1) return;
     
-    const item = items.find(i => i.name === itemSearch);
-    if (!item) return;
+    const term = itemSearch.toLowerCase();
+    // Try exact by name
+    let item = items.find(i => (i.name || '').toLowerCase() === term);
+    // Fallback to first filtered suggestion
+    if (!item && filteredItems.length > 0) item = filteredItems[0];
+    // Fallback to contains
+    if (!item) item = items.find(i => (i.name || '').toLowerCase().includes(term));
+    if (!item) {
+      alert('Item tidak ditemukan. Pilih dari daftar saran.');
+      return;
+    }
     
-    const existingIndex = selectedItems.findIndex(i => i.name === item.name);
+    const key = item.id ?? item.name;
+    const existingIndex = selectedItems.findIndex(i => (i.id ?? i.name) === key);
     if (existingIndex >= 0) {
       const updatedItems = [...selectedItems];
-      updatedItems[existingIndex].qty += selectedItemQty;
-      updatedItems[existingIndex].total = updatedItems[existingIndex].qty * item.price;
+      const newQty = (updatedItems[existingIndex].qty || 0) + selectedItemQty;
+      updatedItems[existingIndex] = {
+        ...updatedItems[existingIndex],
+        qty: newQty,
+        total: newQty * (item.price || 0)
+      };
       setSelectedItems(updatedItems);
     } else {
       const newItem = {
         ...item,
         qty: selectedItemQty,
-        total: item.price * selectedItemQty
+        total: (item.price || 0) * selectedItemQty
       };
       setSelectedItems(prev => [...prev, newItem]);
     }
@@ -392,6 +425,7 @@ const QuotationForm = ({ open, initialData, onSave, onClose }) => {
                         onChange={e => setItemSearch(e.target.value)}
                         onFocus={() => setShowItemSuggestions(itemSearch.length > 0)}
                         onBlur={() => setTimeout(() => setShowItemSuggestions(false), 200)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSelectedItem(); } }}
                         placeholder="Ketik nama item..."
                       />
                       
@@ -425,9 +459,9 @@ const QuotationForm = ({ open, initialData, onSave, onClose }) => {
                         <div className="suggestions-dropdown">
                           {filteredItems.map(item => (
                             <div key={item.id} className="suggestion-item" onClick={() => handleItemSelect(item)}>
-                                                          <div className="suggestion-name">
-                              {item.name}
-                            </div>
+                              <div className="suggestion-name">
+                                {item.name}
+                              </div>
                               <div className="suggestion-details">
                                 <span className={`type-badge ${item.type}`}>
                                   {item.type}
@@ -437,6 +471,9 @@ const QuotationForm = ({ open, initialData, onSave, onClose }) => {
                                 <span>{item.unit}</span>
                                 <span>•</span>
                                 <span className="price">Rp {item.price?.toLocaleString('id-ID') || '0'}</span>
+                                {item.description && (
+                                  <span className="desc"> — {item.description.slice(0, 40)}{item.description.length > 40 ? '…' : ''}</span>
+                                )}
                               </div>
                             </div>
                           ))}
@@ -612,4 +649,4 @@ const QuotationForm = ({ open, initialData, onSave, onClose }) => {
   );
 };
 
-export default QuotationForm; 
+export default QuotationForm;

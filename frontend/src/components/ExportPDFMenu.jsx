@@ -33,6 +33,8 @@ const ExportPDFMenu = ({ quotation, onClose }) => {
       const pdfBlob = pdf.output('blob');
       const pdfUrl = URL.createObjectURL(pdfBlob);
       window.open(pdfUrl, '_blank');
+      // Revoke after some delay to let the new tab read the blob URL
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 30000);
       onClose?.();
     } catch (error) {
       console.error('Error previewing PDF:', error);
@@ -48,7 +50,7 @@ const ExportPDFMenu = ({ quotation, onClose }) => {
       <div className="export-pdf-content">
         <div className="export-pdf-header">
           <h3>Export PDF Quotation</h3>
-          <button className="close-btn" onClick={onClose}>
+          <button className="close-btn" onClick={onClose} disabled={isExporting}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
@@ -83,20 +85,22 @@ const ExportPDFMenu = ({ quotation, onClose }) => {
               className="btn-preview"
               onClick={handlePreviewPDF}
               disabled={isExporting}
+              title="Preview PDF di tab baru"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
               </svg>
-              {isExporting ? 'Loading...' : 'Preview PDF'}
+              {isExporting ? 'Exporting...' : 'Preview PDF'}
             </button>
-            
             <button 
               className="btn-download"
               onClick={handleExportPDF}
               disabled={isExporting}
+              title="Download PDF"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7,10 12,15 17,10"/>
                 <line x1="12" y1="15" x2="12" y2="3"/>
