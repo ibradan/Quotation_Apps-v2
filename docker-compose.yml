@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Backend service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: quotation-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    volumes:
+      - ./backend/quotation.db:/app/backend/quotation.db
+      - ./backend/uploads:/app/backend/uploads
+    networks:
+      - quotation-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend service (development)
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: quotation-frontend-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - quotation-network
+    depends_on:
+      - backend
+    profiles:
+      - dev
+
+  # Frontend service (production)
+  frontend-prod:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: quotation-frontend-prod
+    restart: unless-stopped
+    networks:
+      - quotation-network
+    depends_on:
+      - backend
+    profiles:
+      - prod
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: quotation-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    networks:
+      - quotation-network
+    depends_on:
+      - backend
+      - frontend-prod
+    profiles:
+      - prod
+
+networks:
+  quotation-network:
+    driver: bridge
+
+volumes:
+  quotation-data:
+    driver: local
