@@ -46,6 +46,9 @@ async function initializeDatabase() {
     await dbManager.connect(dbPath);
     logger.info('Database initialized successfully');
     
+    // Fix database structure if needed
+    await fixDatabaseStructure();
+    
     // Optimize database
     await dbManager.optimize();
     logger.info('Database optimized');
@@ -56,6 +59,94 @@ async function initializeDatabase() {
   } catch (error) {
     logger.error('Database initialization failed', error);
     process.exit(1);
+  }
+}
+
+// Fix database structure
+async function fixDatabaseStructure() {
+  try {
+    // Check and create tables if they don't exist
+    const tables = [
+      {
+        name: 'quotations',
+        sql: `CREATE TABLE IF NOT EXISTS quotations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          customer TEXT,
+          date TEXT,
+          status TEXT,
+          title TEXT DEFAULT 'PENAWARAN BARANG/JASA',
+          quotation_number TEXT,
+          discount REAL DEFAULT 0,
+          tax REAL DEFAULT 11,
+          total REAL DEFAULT 0
+        )`
+      },
+      {
+        name: 'customers',
+        sql: `CREATE TABLE IF NOT EXISTS customers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          email TEXT,
+          phone TEXT,
+          address TEXT,
+          city TEXT
+        )`
+      },
+      {
+        name: 'items',
+        sql: `CREATE TABLE IF NOT EXISTS items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          quotation_id INTEGER,
+          name TEXT,
+          type TEXT,
+          qty INTEGER,
+          price REAL,
+          unit TEXT,
+          stock INTEGER DEFAULT 0,
+          FOREIGN KEY (quotation_id) REFERENCES quotations(id)
+        )`
+      },
+      {
+        name: 'settings',
+        sql: `CREATE TABLE IF NOT EXISTS settings (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          company_name TEXT DEFAULT 'QUOTATION APPS',
+          company_address TEXT DEFAULT 'Jl. Contoh No. 123',
+          company_city TEXT DEFAULT 'Jakarta, Indonesia 12345',
+          company_phone TEXT DEFAULT '+62 21 1234 5678',
+          company_email TEXT DEFAULT 'info@quotationapps.com',
+          company_website TEXT DEFAULT '',
+          company_logo TEXT DEFAULT ''
+        )`
+      }
+    ];
+
+    for (const table of tables) {
+      await dbManager.run(table.sql);
+      logger.info(`Table ${table.name} checked/created`);
+    }
+
+    // Insert default settings if not exists
+    const settingsCount = await dbManager.get('SELECT COUNT(*) as count FROM settings');
+    if (settingsCount.count === 0) {
+      await dbManager.run(`INSERT INTO settings 
+        (company_name, company_address, company_city, company_phone, company_email, company_website, company_logo) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+        'QUOTATION APPS',
+        'Jl. Contoh No. 123',
+        'Jakarta, Indonesia 12345',
+        '+62 21 1234 5678',
+        'info@quotationapps.com',
+        '',
+        ''
+      ]);
+      logger.info('Default settings inserted');
+    }
+
+    logger.info('Database structure fixed successfully');
+  } catch (error) {
+    logger.error('Failed to fix database structure', error);
+    throw error;
   }
 }
 
@@ -109,7 +200,8 @@ app.get('/api/quotations', async (req, res) => {
     }
     
     const start = Date.now();
-    const quotations = await dbManager.all('SELECT * FROM quotations ORDER BY created_at DESC');
+    // Use id for ordering instead of created_at for compatibility
+    const quotations = await dbManager.all('SELECT * FROM quotations ORDER BY id DESC');
     const duration = Date.now() - start;
     
     logger.logDatabase('SELECT', 'quotations', duration, true);
@@ -278,7 +370,8 @@ app.get('/api/customers', async (req, res) => {
     }
     
     const start = Date.now();
-    const customers = await dbManager.all('SELECT * FROM customers ORDER BY name');
+    // Use id for ordering instead of name for compatibility
+    const customers = await dbManager.all('SELECT * FROM customers ORDER BY id');
     const duration = Date.now() - start;
     
     logger.logDatabase('SELECT', 'customers', duration, true);
@@ -328,7 +421,8 @@ app.get('/api/items', async (req, res) => {
     }
     
     const start = Date.now();
-    const items = await dbManager.all('SELECT * FROM items ORDER BY name');
+    // Use id for ordering instead of name for compatibility
+    const items = await dbManager.all('SELECT * FROM items ORDER BY id');
     const duration = Date.now() - start;
     
     logger.logDatabase('SELECT', 'items', duration, true);
@@ -352,6 +446,7 @@ app.get('/api/settings', async (req, res) => {
     }
     
     const start = Date.now();
+    // Use id for ordering instead of created_at for compatibility
     const settings = await dbManager.get('SELECT * FROM settings ORDER BY id DESC LIMIT 1');
     const duration = Date.now() - start;
     
