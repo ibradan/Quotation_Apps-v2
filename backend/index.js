@@ -1810,6 +1810,16 @@ app.post('/database/reset', (req, res) => {
   });
 });
 
+// Health check endpoint untuk Docker
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy - auto-update enabled! 🚀',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // 404 handler - harus di paling akhir
 app.use((req, res) => {
   res.status(404).json({

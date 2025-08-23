@@ -295,15 +295,6 @@ function AppContent() {
           <h1 className="mobile-title">Quotation Apps</h1>
         </div>
 
-        {/* Breadcrumb Navigation */}
-        <div className="breadcrumb">
-          <span className="breadcrumb-item">Home</span>
-          <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-item active">
-            {navigationItems.find(item => item.id === currentPage)?.label || 'Dashboard'}
-          </span>
-        </div>
-
         {/* Main Content Area - dengan animasi ringan */}
         <main className="app-main">
           <div className={`page-content ${pageTransition}`}>

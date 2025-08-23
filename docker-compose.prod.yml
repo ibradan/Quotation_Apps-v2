@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quotation-backend-prod
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - quotation-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    networks:
+      - quotation-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Nginx Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: quotation-frontend-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - VITE_API_URL=http://backend:3001
+    networks:
+      - quotation-network
+    depends_on:
+      - backend
+    restart: always
+
+  # Database Volume Backup Service (Optional)
+  backup:
+    image: alpine:latest
+    container_name: quotation-backup
+    volumes:
+      - quotation-data:/data
+      - ./backups:/backups
+    command: >
+      sh -c "
+      while true; do
+        tar -czf /backups/quotation-backup-$$(date +%Y%m%d-%H%M%S).tar.gz -C /data .
+        find /backups -name '*.tar.gz' -mtime +7 -delete
+        sleep 86400
+      done"
+    networks:
+      - quotation-network
+    restart: unless-stopped
+
+networks:
+  quotation-network:
+    driver: bridge
+
+volumes:
+  quotation-data:

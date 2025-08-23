@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quotation-backend-dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./backend/uploads:/app/uploads
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+    networks:
+      - quotation-network
+    restart: unless-stopped
+    command: ["sh", "-c", "npm install && npx nodemon index.js"]
+
+  # Frontend React Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: quotation-frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:3001
+    networks:
+      - quotation-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  quotation-network:
+    driver: bridge
+
+volumes:
+  quotation-data:
