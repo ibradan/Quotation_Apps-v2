@@ -28,8 +28,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Inisialisasi database
-const dbPath = process.env.DB_PATH || './quotation.db';
-const db = new sqlite3.Database(dbPath, (err) => {
+const db = new sqlite3.Database('./quotation.db', (err) => {
   if (err) {
     console.error('Error opening database', err);
   } else {
@@ -1763,16 +1762,6 @@ app.post('/database/import', (req, res) => {
       console.error('Error importing database:', error);
       res.status(500).json({ success: false, error: error.message });
     }
-  });
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
   });
 });
 

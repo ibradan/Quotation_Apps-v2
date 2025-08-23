@@ -4,7 +4,6 @@ import QuotationForm from './QuotationForm';
 import QuotationDetail from '../QuotationDetail';
 import ExportPDFMenu from './ExportPDFMenu';
 import QuotationPDFExporter from './QuotationPDFExporter';
-import { useSettings } from '../hooks/useSettings';
 
 const QuotationList = ({ quotations }) => {
   const {
@@ -32,7 +31,6 @@ const QuotationList = ({ quotations }) => {
   const [exportPDFData, setExportPDFData] = React.useState(null);
   
   const { generateQuotationPDF } = QuotationPDFExporter();
-  const { settings } = useSettings();
 
   const openEditForm = (quotation) => {
     setEditData(quotation);
@@ -79,7 +77,7 @@ const QuotationList = ({ quotations }) => {
 
   const handleQuickExportPDF = async (quotation) => {
     try {
-      const pdf = await generateQuotationPDF(quotation, settings || {});
+      const pdf = await generateQuotationPDF(quotation, {});
       pdf.save(`quotation_${quotation.quotation_number || quotation.id}.pdf`);
     } catch (error) {
       console.error('Error exporting PDF:', error);
@@ -439,4 +437,4 @@ const QuotationList = ({ quotations }) => {
   );
 };
 
-export default QuotationList;
+export default QuotationList; 

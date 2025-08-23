@@ -1,5 +1,6 @@
 import React from 'react';
 import './Dashboard.css';
+import LineChart from './LineChart';
 
 const Dashboard = ({ quotations, items, customers, navigate }) => {
   const totalQuotations = quotations.quotations?.length || 0;
@@ -36,9 +37,13 @@ const Dashboard = ({ quotations, items, customers, navigate }) => {
       const date = new Date(currentYear, currentMonth, day);
       const dateStr = date.toISOString().split('T')[0];
       
-      const quotationsCount = quotations.quotations?.filter(q => 
-        q.date === dateStr
-      ).length || 0;
+      // Count quotations for this specific date
+      const quotationsCount = quotations.quotations?.filter(q => {
+        const qDate = new Date(q.date);
+        return qDate.getDate() === day && 
+               qDate.getMonth() === currentMonth && 
+               qDate.getFullYear() === currentYear;
+      }).length || 0;
       
       monthData.push({
         day: day,
@@ -51,7 +56,6 @@ const Dashboard = ({ quotations, items, customers, navigate }) => {
   };
 
   const chartData = getChartData();
-  const maxCount = Math.max(...chartData.map(d => d.count), 6);
   const currentMonthName = new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
   // Handle navigation clicks
@@ -251,56 +255,11 @@ const Dashboard = ({ quotations, items, customers, navigate }) => {
 
       {/* Quotation Chart Section */}
       <div className="dashboard-section">
-        <div className="section-header">
-          <h2>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px', color: '#1a73e8'}}>
-              <path d="M3 3v18h18"/>
-              <path d="m19 9-5 5-4-4-3 3"/>
-            </svg>
-            Grafik Penawaran Bulan {currentMonthName}
-          </h2>
-          <span className="section-subtitle">Jumlah penawaran yang dibuat per tanggal dalam bulan ini</span>
-        </div>
-        
-        <div className="chart-container">
-          <div className="chart-wrapper">
-            <div className="chart-y-axis">
-              {[0,1,2,3,4,5,6].map(num => (
-                <span key={num} className="y-axis-label">{num}</span>
-              ))}
-            </div>
-            <div className="chart-content">
-              <div className="chart-bars">
-                {chartData.map((data, index) => (
-                  <div key={index} className="chart-bar-container">
-                    <div 
-                      className="chart-bar" 
-                      style={{ 
-                        height: `${(data.count / (maxCount || 1)) * 100}%`,
-                        minHeight: data.count > 0 ? '8px' : '2px'
-                      }}
-                      title={`${data.day} ${currentMonthName}: ${data.count} penawaran`}
-                    >
-                      {data.count > 0 && (
-                        <span className="bar-value">{data.count}</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="chart-x-axis">
-                <div className="x-axis-days">
-                  {chartData.map((data, index) => (
-                    <span key={index} className="x-axis-day">{data.day}</span>
-                  ))}
-                </div>
-                <div className="x-axis-month">
-                  {currentMonthName}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <LineChart 
+          data={chartData}
+          title={`Grafik Penawaran Bulan ${currentMonthName}`}
+          subtitle="Jumlah penawaran yang dibuat per tanggal dalam bulan ini"
+        />
       </div>
 
       {/* Quick Actions */}
