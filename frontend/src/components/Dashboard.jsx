@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Dashboard.css';
 import LineChart from './LineChart';
 
@@ -8,6 +8,9 @@ const Dashboard = ({ quotations, items, customers, navigate }) => {
   const totalCustomers = customers.customers?.length || 0;
   
   const recentQuotations = quotations.quotations?.slice(0, 6) || [];
+
+  // State for chart month navigation
+  const [chartDate, setChartDate] = useState(new Date());
 
   // Calculate additional statistics
   const approvedQuotations = quotations.quotations?.filter(q => q.status === 'approved').length || 0;
@@ -24,25 +27,24 @@ const Dashboard = ({ quotations, items, customers, navigate }) => {
     return qDate.getMonth() === currentMonth && qDate.getFullYear() === currentYear;
   }).length || 0;
 
-  // Generate chart data for current month (1-31 days)
+  // Generate chart data for selected month (1-31 days)
   const getChartData = () => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const selectedMonth = chartDate.getMonth();
+    const selectedYear = chartDate.getFullYear();
+    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
     
     const monthData = [];
     
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentYear, currentMonth, day);
+      const date = new Date(selectedYear, selectedMonth, day);
       const dateStr = date.toISOString().split('T')[0];
       
       // Count quotations for this specific date
       const quotationsCount = quotations.quotations?.filter(q => {
         const qDate = new Date(q.date);
         return qDate.getDate() === day && 
-               qDate.getMonth() === currentMonth && 
-               qDate.getFullYear() === currentYear;
+               qDate.getMonth() === selectedMonth && 
+               qDate.getFullYear() === selectedYear;
       }).length || 0;
       
       monthData.push({
@@ -56,7 +58,32 @@ const Dashboard = ({ quotations, items, customers, navigate }) => {
   };
 
   const chartData = getChartData();
-  const currentMonthName = new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+  const selectedMonthName = chartDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+  // Month navigation functions
+  const goToPreviousMonth = () => {
+    const newDate = new Date(chartDate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    setChartDate(newDate);
+  };
+
+  const goToNextMonth = () => {
+    const newDate = new Date(chartDate);
+    newDate.setMonth(newDate.getMonth() + 1);
+    setChartDate(newDate);
+  };
+
+  const goToCurrentMonth = () => {
+    setChartDate(new Date());
+  };
+
+  // Check if we can go to next month (not future months)
+  const canGoNext = () => {
+    const nextMonth = new Date(chartDate);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const now = new Date();
+    return nextMonth <= now;
+  };
 
   // Handle navigation clicks
   const handleQuickAction = (action) => {
@@ -255,9 +282,58 @@ const Dashboard = ({ quotations, items, customers, navigate }) => {
 
       {/* Quotation Chart Section */}
       <div className="dashboard-section">
+        <div className="chart-header">
+          <div className="chart-title-section">
+            <h2>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px', color: '#1a73e8'}}>
+                <path d="M3 3v18h18"/>
+                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+              </svg>
+              Grafik Penawaran
+            </h2>
+            <p className="chart-subtitle">Jumlah penawaran yang dibuat per tanggal dalam bulan {selectedMonthName}</p>
+          </div>
+          
+          <div className="chart-navigation">
+            <button 
+              className="nav-btn" 
+              onClick={goToPreviousMonth}
+              title="Bulan Sebelumnya"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15,18 9,12 15,6"/>
+              </svg>
+            </button>
+            
+            <div className="month-display">
+              <span className="month-name">{selectedMonthName}</span>
+              {chartDate.getMonth() !== new Date().getMonth() || chartDate.getFullYear() !== new Date().getFullYear() ? (
+                <button 
+                  className="current-month-btn" 
+                  onClick={goToCurrentMonth}
+                  title="Kembali ke Bulan Ini"
+                >
+                  Bulan Ini
+                </button>
+              ) : null}
+            </div>
+            
+            <button 
+              className="nav-btn" 
+              onClick={goToNextMonth}
+              disabled={!canGoNext()}
+              title={canGoNext() ? "Bulan Berikutnya" : "Tidak bisa melihat bulan yang akan datang"}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9,18 15,12 9,6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
         <LineChart 
           data={chartData}
-          title={`Grafik Penawaran Bulan ${currentMonthName}`}
+          title={`Grafik Penawaran Bulan ${selectedMonthName}`}
           subtitle="Jumlah penawaran yang dibuat per tanggal dalam bulan ini"
         />
       </div>
